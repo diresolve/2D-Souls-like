@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 858dcf2516bf136469d16f66b579c6f7
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - cameraFollowObject: {instanceID: 0}
+  - feetCollider: {instanceID: 0}
+  - spriteRenderer: {instanceID: 0}
+  - drop: {fileID: 8324130531004165683, guid: 6d2b33871b1876744835c6b2d1265108, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
