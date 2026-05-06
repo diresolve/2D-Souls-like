@@ -5,6 +5,8 @@
 [Bb]uilds/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
 
 *.pidb.meta
 *.pdb.meta
@@ -12,14 +14,10 @@
 
 sysinfo.txt
 
-*.apk
-*.aab
-*.unitypackage
-*.app
-
 crashlytics-build.properties
 
 .vs/
+.vscode/
 .idea/
 *.suo
 *.user
@@ -27,6 +25,7 @@ crashlytics-build.properties
 *.sln.docstates
 *.csproj
 *.sln
+*.sln.iml
 
 .DS_Store
 .DS_Store?
@@ -36,10 +35,5 @@ crashlytics-build.properties
 ehthumbs.db
 Thumbs.db
 
-.idea/
-
-!Packages/manifest.json
-!Packages/packages-lock.json
-
-bin/
-obj/
+.gradle/
+local.properties
