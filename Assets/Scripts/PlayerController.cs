@@ -65,12 +65,17 @@ public class PlayerController : MonoBehaviour
 
     private float originalGravityScale;
 
+    private bool isDead = false;
+
     //public static Vector3 lastDeathPosition;
     //public static int droppedSoulsAmount = 0;
     //public static bool hasDroppedSouls = false;
 
+    [SerializeField] GameObject _gameOverScreen;
+
     private void Start()
     {
+        _gameOverScreen.SetActive(false);
         rb2D = gameObject.GetComponent<Rigidbody2D>();
         rb2D.sleepMode = RigidbodySleepMode2D.NeverSleep;
         originalMaxSpeed = maxMoveSpeed;
@@ -94,6 +99,8 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (isDead) return;
+
         if (!canMove || isDashing)
         {
             moveHorizontal = 0f;
@@ -128,6 +135,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (isDead) return;
         if (isDashing) return;
 
         if (feetCollider != null)
@@ -242,6 +250,8 @@ public class PlayerController : MonoBehaviour
 
             TakeDamage(1);
 
+            if (isDead) return;
+
             Vector2 contactNormal = collision.GetContact(0).normal;
             rb2D.linearVelocity = Vector2.zero;
 
@@ -351,6 +361,7 @@ public class PlayerController : MonoBehaviour
 
     private void Die()
     {
+        isDead = true;
         //gameObject.SetActive(false);
 
         //if (currentSouls > 0)
@@ -380,7 +391,18 @@ public class PlayerController : MonoBehaviour
                 GameManager.Instance.ClearDroppedSouls();
             }
         }
-        
+
+        //_gameOverScreen.SetActive(true);
+        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+        StartCoroutine(GameOverRoutine());
+    }
+
+    private IEnumerator GameOverRoutine()
+    {
+        _gameOverScreen.SetActive(true);
+        rb2D.simulated = false;
+        yield return new WaitForSeconds(2f);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
