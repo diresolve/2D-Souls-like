@@ -30,9 +30,22 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float upwardBounceForce = 15f;
 
     [Header("Health")]
-    [SerializeField] private int maxHealth = 3;
+    [SerializeField] private UnityEngine.UI.Slider healthBar;
+    [SerializeField] private int maxHealth = 100;
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private float flashInterval = 0.1f;
+
+    // stamina system
+    [Header("Stamina")]
+    [SerializeField] private UnityEngine.UI.Slider staminaBar;
+    [SerializeField] private float maxStamina = 100f;
+    [SerializeField] private float staminaRegenRate = 35f;
+    [SerializeField] private float staminaRegenDelay = 1f;
+
+    [SerializeField] private float dashStaminaCost = 25f;
+
+    [SerializeField] private float currentStamina;
+    [SerializeField] private float lastStaminaUse;
 
     [Header("Currency")]
     [SerializeField] private int currentSouls = 0;
@@ -53,6 +66,10 @@ public class PlayerController : MonoBehaviour
     private bool isFacingRight = true;
     private bool isGrounded;
     private bool jumpRequested;
+
+    // for double jump
+    private int maxJumps = 2;
+    private int jumpsRemaining = 2;
 
     private bool canMove = true;
     private float originalMaxSpeed;
@@ -80,6 +97,21 @@ public class PlayerController : MonoBehaviour
         rb2D.sleepMode = RigidbodySleepMode2D.NeverSleep;
         originalMaxSpeed = maxMoveSpeed;
         currentHealth = maxHealth;
+
+        if (healthBar != null)
+        {
+            healthBar.maxValue = maxHealth;
+            healthBar.value = currentHealth;
+        }
+
+        currentStamina = maxStamina;
+
+        if (staminaBar != null)
+        {
+            staminaBar.maxValue = maxStamina;
+            staminaBar.value = currentStamina;
+        }
+
         originalJumpForce = jumpForce;
         originalGravityScale = rb2D.gravityScale;
 
@@ -101,6 +133,10 @@ public class PlayerController : MonoBehaviour
     {
         if (isDead) return;
 
+        HandleStaminaRegen();
+
+        if (isDashing) return;
+
         if (!canMove || isDashing)
         {
             moveHorizontal = 0f;
@@ -109,7 +145,7 @@ public class PlayerController : MonoBehaviour
 
         moveHorizontal = Input.GetAxisRaw("Horizontal");
 
-        if (Input.GetButtonDown("Jump") && isGrounded && !isDashing)
+        if (Input.GetButtonDown("Jump") /*&& isGrounded*/ && !isDashing && jumpsRemaining > 0)
         {
             jumpRequested = true;
         }
@@ -124,7 +160,7 @@ public class PlayerController : MonoBehaviour
             StartCoroutine(PerformInteraction());
         }
 
-        if (Input.GetButtonDown("Dash") && canDash)
+        if (Input.GetButtonDown("Dash") && canDash && currentStamina >= dashStaminaCost)
         {
             StartCoroutine(Dash());
         }
@@ -159,6 +195,7 @@ public class PlayerController : MonoBehaviour
         if (jumpRequested)
         {
             rb2D.linearVelocity = new Vector2(rb2D.linearVelocity.x, jumpForce);
+            jumpsRemaining--;
             jumpRequested = false;
         }
 
@@ -167,9 +204,11 @@ public class PlayerController : MonoBehaviour
             rb2D.linearVelocity = new Vector2(rb2D.linearVelocity.x, terminalVelocity);
         }
 
-        if (isGrounded)
+        if (isGrounded && rb2D.linearVelocity.y <= 0.01f)
         {
             canDash = true;
+            jumpsRemaining = maxJumps;
+
         }
 
         CameraYDampingCheck();
@@ -248,7 +287,7 @@ public class PlayerController : MonoBehaviour
             canMove = false;
             isInvulnerable = true;
 
-            TakeDamage(1);
+            TakeDamage(15);
 
             if (isDead) return;
 
@@ -340,6 +379,11 @@ public class PlayerController : MonoBehaviour
     {
         currentHealth -= damageAmount;
 
+        if (healthBar != null)
+        {
+            healthBar.value = currentHealth;
+        }
+
         if (currentHealth <= 0)
         {
             Die();
@@ -426,11 +470,16 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator Dash()
     {
+        currentStamina -= dashStaminaCost;
+        lastStaminaUse = Time.time;
+
         canDash = false;
         isDashing = true;
 
         float originalGravity = rb2D.gravityScale;
         rb2D.gravityScale = 0f;
+
+        //float dashDuration = isGrounded ? dashingTime : 0.05f;
 
         dashingDir = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         if (dashingDir == Vector2.zero)
@@ -442,6 +491,21 @@ public class PlayerController : MonoBehaviour
 
         yield return new WaitForSeconds(dashingTime);
         rb2D.gravityScale = originalGravity;
+        //rb2D.linearVelocity = new Vector2(rb2D.linearVelocity.x * 0.8f, 0f);
         isDashing = false;
+    }
+
+    private void HandleStaminaRegen()
+    {
+        if (currentStamina < maxStamina && Time.time >= lastStaminaUse + staminaRegenDelay)
+        {
+            currentStamina += staminaRegenRate * Time.deltaTime;
+            currentStamina = Mathf.Clamp(currentStamina, 0f, maxStamina);
+        }
+
+        if (staminaBar != null)
+        {
+            staminaBar.value = currentStamina;
+        }
     }
 }
