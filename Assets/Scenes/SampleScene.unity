@@ -823,6 +823,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 557912380}
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.1
+  knockbackResistance: 6
 --- !u!50 &557912378
 Rigidbody2D:
   serializedVersion: 5
@@ -831,7 +832,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 557912376}
-  m_BodyType: 1
+  m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -849,7 +850,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 2147483644
 --- !u!61 &557912379
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -964,8 +965,8 @@ Transform:
   m_GameObject: {fileID: 557912376}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -10.39, y: -1.07, z: 0}
-  m_LocalScale: {x: 2.3096638, y: 2.997064, z: 1.3748}
+  m_LocalPosition: {x: -10.8161, y: -1.8834, z: 0}
+  m_LocalScale: {x: 1.4573978, y: 1.3702577, z: 1.3748}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1636,7 +1637,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 957503782}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: AttackPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3171,7 +3172,7 @@ GameObject:
   - component: {fileID: 1866114890}
   - component: {fileID: 1866114889}
   - component: {fileID: 1866114891}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}

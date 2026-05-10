@@ -51,13 +51,18 @@ public class PlayerCombat : MonoBehaviour
             hitPosition = transform.position + Vector3.down * 1.5f;
             actualBoxSize = new Vector2(attackBoxSize.y, attackBoxSize.x);
         }
-        Collider2D[] hitEnemies = Physics2D.OverlapBoxAll(hitPosition, attackBoxSize, 0f, enemyLayers);
+        Collider2D[] hitEnemies = Physics2D.OverlapBoxAll(hitPosition, actualBoxSize, 0f, enemyLayers);
         foreach (Collider2D enemy in hitEnemies)
         {
             IDamageable damageable = enemy.GetComponent<IDamageable>();
             if (damageable != null)
             {
-                damageable.TakeDamage(attackDamage); // poboljsat interakciju, da ima neki bounce i to
+                float differenceX = enemy.transform.position.x - transform.position.x;
+                float forceDirection = differenceX >= 0 ? 1f : -1f;
+
+                Vector2 attackDir = new Vector2(forceDirection, 0f);
+
+                damageable.TakeDamage(attackDamage, attackDir);
                 StartCoroutine(HitStop(0.05f));
             }
         }
