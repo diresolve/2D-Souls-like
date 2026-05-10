@@ -10,6 +10,7 @@ TagManager:
   - Swamp
   - GravityZone
   - Interactable
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -17,7 +18,7 @@ TagManager:
   - Ground
   - Water
   - UI
-  - 
+  - Enemy
   - 
   - 
   - 

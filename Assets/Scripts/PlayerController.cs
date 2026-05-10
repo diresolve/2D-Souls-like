@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -90,6 +91,13 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] GameObject _gameOverScreen;
 
+    private PlayerCombat combatScript;
+
+    private void Awake()
+    {
+        combatScript = GetComponent<PlayerCombat>();
+    }
+
     private void Start()
     {
         _gameOverScreen.SetActive(false);
@@ -145,6 +153,8 @@ public class PlayerController : MonoBehaviour
 
         moveHorizontal = Input.GetAxisRaw("Horizontal");
 
+
+        // to do: moze skocit s enemyja samo ako drugi put skace
         if (Input.GetButtonDown("Jump") /*&& isGrounded*/ && !isDashing && jumpsRemaining > 0)
         {
             jumpRequested = true;
@@ -162,7 +172,22 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetButtonDown("Dash") && canDash && currentStamina >= dashStaminaCost)
         {
-            StartCoroutine(Dash());
+            if (canConsumeStamina(dashStaminaCost))
+            {
+                StartCoroutine(Dash());
+            }
+            
+        }
+
+        if (Input.GetButtonDown("Fire1") && !isDashing /*&& isGrounded && !isDashing*/)
+        {
+            if (combatScript != null && !combatScript.isAttacking)
+            {
+                if (canConsumeStamina(15f))
+                {
+                    StartCoroutine(combatScript.Attack());
+                }
+            }
         }
 
         TurnCheck();
@@ -470,8 +495,8 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator Dash()
     {
-        currentStamina -= dashStaminaCost;
-        lastStaminaUse = Time.time;
+        //currentStamina -= dashStaminaCost;
+        //lastStaminaUse = Time.time;
 
         canDash = false;
         isDashing = true;
@@ -508,4 +533,32 @@ public class PlayerController : MonoBehaviour
             staminaBar.value = currentStamina;
         }
     }
+
+    public void LockMovementForAttack(bool isLocked)
+    {
+        canMove = !isLocked;
+        if (isLocked)
+        {
+            rb2D.linearVelocity = new Vector2(0f, rb2D.linearVelocity.y);
+        }
+
+    }
+
+    public bool canConsumeStamina(float amount)
+    {
+        if (currentStamina >= amount)
+        {
+            currentStamina -= amount;
+            lastStaminaUse = Time.time;
+
+            if (staminaBar != null)
+            {
+                staminaBar.value = currentStamina;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public bool IsGrounded { get { return isGrounded; } }
 }
