@@ -823,7 +823,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 557912380}
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.1
-  knockbackResistance: 6
+  knockbackResistance: 3
 --- !u!50 &557912378
 Rigidbody2D:
   serializedVersion: 5
@@ -836,7 +836,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 50
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 1
@@ -3316,7 +3316,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 1
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!114 &1866114889
 MonoBehaviour:
@@ -3331,6 +3331,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   cameraFollowObject: {fileID: 1344441802}
+  inputActions: {fileID: 0}
+  playerActionMapName: Player
+  moveActionName: Move
+  jumpActionName: Jump
+  dashActionName: Sprint
+  attackActionName: Attack
+  interactActionName: Interact
+  healActionName: Heal
   maxMoveSpeed: 8
   jumpForce: 36
   acceleration: 50
@@ -3339,6 +3347,10 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
+  bodyCollider: {fileID: 1866114887}
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 64
   terminalVelocity: -12
   swampSpeedMultiplier: 0.4
   swampJumpMultiplier: 0.5
@@ -3422,7 +3434,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
   attackPoint: {fileID: 957503782}
-  attackBoxSize: {x: 2.5, y: 1.5}
+  attackBoxSize: {x: 3, y: 1.5}
   enemyLayers:
     serializedVersion: 2
     m_Bits: 64

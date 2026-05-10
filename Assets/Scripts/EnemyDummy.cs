@@ -43,10 +43,11 @@ public class EnemyDummy : MonoBehaviour, IDamageable
 
         // toma ovaj odi dio je grozan moga si ga popravit
 
-        float baseKnockbackForce = 10f;
+        float baseKnockbackForce = 15f;
 
         Vector2 knockbackDir = new Vector2(attackDirection.x, 0.2f).normalized;
-        enemy.AddForce(knockbackDir * (baseKnockbackForce / knockbackResistance), ForceMode2D.Impulse);
+        float finalForce = (baseKnockbackForce * enemy.mass) / knockbackResistance;
+        enemy.AddForce(knockbackDir * finalForce/*(baseKnockbackForce / knockbackResistance)*/, ForceMode2D.Impulse);
 
 
     }

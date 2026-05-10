@@ -31,6 +31,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private BoxCollider2D feetCollider;
     [SerializeField] private LayerMask groundLayer;
 
+    [SerializeField] private Collider2D bodyCollider;
+    [SerializeField] private LayerMask enemyLayer;
+
     [Header("Mechanics")]
     [SerializeField] private float terminalVelocity = -12f;
     [SerializeField] private float swampSpeedMultiplier = 0.4f;
@@ -238,9 +241,46 @@ public class PlayerController : MonoBehaviour
         {
             isGrounded = feetCollider.IsTouchingLayers(groundLayer);
         }
+        // pokusaj fixanja
 
+        bool isTouchingWallAhead = false;
+        float pushCheckDistance = 0.05f;
+        Vector2 checkDir = new Vector2(moveHorizontal > 0 ? 1 : -1, 0);
+        LayerMask solidObstacle = enemyLayer;
+
+        Collider2D playerCollider = bodyCollider;
+        Vector2 boxCastSize = new Vector2(playerCollider.bounds.size.x * 0.9f, playerCollider.bounds.size.y * 0.8f);
+
+        RaycastHit2D hit = Physics2D.BoxCast(
+            playerCollider.bounds.center,
+            boxCastSize,
+            0f,
+            checkDir,
+            pushCheckDistance,
+            solidObstacle
+        );
+
+
+        if (hit.collider != null && moveHorizontal != 0)
+        {
+            float directionToEnemy = Mathf.Sign(hit.collider.transform.position.x - transform.position.x);
+            float movingDirection = Mathf.Sign(moveHorizontal);
+
+            if (directionToEnemy == movingDirection)
+            {
+                isTouchingWallAhead = true;
+            }
+
+        }
  
         float targetSpeed = moveHorizontal * maxMoveSpeed;
+
+        // ovo se isto dodalo
+        if (isTouchingWallAhead)
+        {
+            targetSpeed = 0f;
+        }
+
         float currentSpeed = rb2D.linearVelocity.x;
 
  
