@@ -1,11 +1,23 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private CameraFollowObject cameraFollowObject;
+
+    [Header("Input")]
+    [SerializeField] private InputActionAsset inputActions;
+    [SerializeField] private string playerActionMapName = "Player";
+    [SerializeField] private string moveActionName = "Move";
+    [SerializeField] private string jumpActionName = "Jump";
+    [SerializeField] private string dashActionName = "Sprint";
+    [SerializeField] private string attackActionName = "Attack";
+    [SerializeField] private string interactActionName = "Interact";
+    [SerializeField] private string healActionName = "Heal";
 
     [Header("Movement")]
     [SerializeField] private float maxMoveSpeed = 8f;
@@ -92,10 +104,35 @@ public class PlayerController : MonoBehaviour
     [SerializeField] GameObject _gameOverScreen;
 
     private PlayerCombat combatScript;
+    private List<InputAction> enabledInputActions = new List<InputAction>();
+    private List<InputAction> ownedInputActions = new List<InputAction>();
+    private InputAction moveAction;
+    private InputAction jumpAction;
+    private InputAction dashAction;
+    private InputAction attackAction;
+    private InputAction interactAction;
+    private InputAction healAction;
+    private Vector2 moveInput;
 
     private void Awake()
     {
         combatScript = GetComponent<PlayerCombat>();
+        InitializeInputActions();
+    }
+
+    private void OnEnable()
+    {
+        EnableGameplayInput();
+    }
+
+    private void OnDisable()
+    {
+        DisableGameplayInput();
+    }
+
+    private void OnDestroy()
+    {
+        DisposeOwnedInputActions();
     }
 
     private void Start()
@@ -142,35 +179,33 @@ public class PlayerController : MonoBehaviour
         if (isDead) return;
 
         HandleStaminaRegen();
+        ReadMoveInput();
 
         if (isDashing) return;
 
-        if (!canMove || isDashing)
+        if (!canMove)
         {
             moveHorizontal = 0f;
             return;
         }
 
-        moveHorizontal = Input.GetAxisRaw("Horizontal");
-
-
         // to do: moze skocit s enemyja samo ako drugi put skace
-        if (Input.GetButtonDown("Jump") /*&& isGrounded*/ && !isDashing && jumpsRemaining > 0)
+        if (WasActionPressedThisFrame(jumpAction) /*&& isGrounded*/ && !isDashing && jumpsRemaining > 0)
         {
             jumpRequested = true;
         }
 
-        if (Input.GetKeyDown(KeyCode.H))
+        if (WasActionPressedThisFrame(healAction))
         {
             StartCoroutine(UseHealingFlask());
         }
 
-        if (Input.GetKeyDown(KeyCode.E) && currentInteractableDoor != null)
+        if (WasActionPressedThisFrame(interactAction) && currentInteractableDoor != null)
         {
             StartCoroutine(PerformInteraction());
         }
 
-        if (Input.GetButtonDown("Dash") && canDash && currentStamina >= dashStaminaCost)
+        if (WasActionPressedThisFrame(dashAction) && canDash && currentStamina >= dashStaminaCost)
         {
             if (canConsumeStamina(dashStaminaCost))
             {
@@ -179,7 +214,7 @@ public class PlayerController : MonoBehaviour
             
         }
 
-        if (Input.GetButtonDown("Fire1") && !isDashing /*&& isGrounded && !isDashing*/)
+        if (WasActionPressedThisFrame(attackAction) && !isDashing /*&& isGrounded && !isDashing*/)
         {
             if (combatScript != null && !combatScript.isAttacking)
             {
@@ -281,6 +316,155 @@ public class PlayerController : MonoBehaviour
     }
 
     public bool IsFacingRight { get { return isFacingRight; } }
+    public float VerticalInput { get { return moveInput.y; } }
+
+    private void InitializeInputActions()
+    {
+        InputActionMap playerActionMap = inputActions != null
+            ? inputActions.FindActionMap(playerActionMapName, false)
+            : null;
+
+        moveAction = FindInputAction(playerActionMap, moveActionName, CreateMoveAction);
+        jumpAction = FindInputAction(playerActionMap, jumpActionName, CreateJumpAction);
+        dashAction = FindInputAction(playerActionMap, dashActionName, CreateDashAction);
+        attackAction = FindInputAction(playerActionMap, attackActionName, CreateAttackAction);
+        interactAction = FindInputAction(playerActionMap, interactActionName, CreateInteractAction);
+        healAction = FindInputAction(playerActionMap, healActionName, CreateHealAction);
+    }
+
+    private InputAction FindInputAction(InputActionMap actionMap, string actionName, Func<InputAction> fallbackFactory)
+    {
+        if (actionMap != null && !string.IsNullOrWhiteSpace(actionName))
+        {
+            InputAction action = actionMap.FindAction(actionName, false);
+            if (action != null)
+            {
+                return action;
+            }
+        }
+
+        InputAction fallbackAction = fallbackFactory();
+        ownedInputActions.Add(fallbackAction);
+        return fallbackAction;
+    }
+
+    private InputAction CreateMoveAction()
+    {
+        InputAction action = new InputAction(moveActionName, InputActionType.Value, expectedControlType: "Vector2");
+
+        action.AddCompositeBinding("2DVector")
+            .With("Up", "<Keyboard>/w")
+            .With("Down", "<Keyboard>/s")
+            .With("Left", "<Keyboard>/a")
+            .With("Right", "<Keyboard>/d");
+
+        action.AddCompositeBinding("2DVector")
+            .With("Up", "<Keyboard>/upArrow")
+            .With("Down", "<Keyboard>/downArrow")
+            .With("Left", "<Keyboard>/leftArrow")
+            .With("Right", "<Keyboard>/rightArrow");
+
+        action.AddBinding("<Gamepad>/leftStick");
+        action.AddBinding("<Gamepad>/dpad");
+
+        return action;
+    }
+
+    private InputAction CreateJumpAction()
+    {
+        return CreateButtonAction(jumpActionName, "<Keyboard>/space", "<Gamepad>/buttonSouth");
+    }
+
+    private InputAction CreateDashAction()
+    {
+        return CreateButtonAction(dashActionName, "<Keyboard>/leftShift", "<Gamepad>/leftStickPress", "<Gamepad>/rightShoulder");
+    }
+
+    private InputAction CreateAttackAction()
+    {
+        return CreateButtonAction(attackActionName, "<Mouse>/leftButton", "<Keyboard>/leftCtrl", "<Gamepad>/buttonWest");
+    }
+
+    private InputAction CreateInteractAction()
+    {
+        return CreateButtonAction(interactActionName, "<Keyboard>/e", "<Gamepad>/buttonNorth");
+    }
+
+    private InputAction CreateHealAction()
+    {
+        return CreateButtonAction(healActionName, "<Keyboard>/h", "<Gamepad>/selectButton");
+    }
+
+    private InputAction CreateButtonAction(string actionName, params string[] bindings)
+    {
+        InputAction action = new InputAction(actionName, InputActionType.Button);
+
+        foreach (string binding in bindings)
+        {
+            action.AddBinding(binding);
+        }
+
+        return action;
+    }
+
+    private void EnableGameplayInput()
+    {
+        if (moveAction == null)
+        {
+            InitializeInputActions();
+        }
+
+        EnableInputAction(moveAction);
+        EnableInputAction(jumpAction);
+        EnableInputAction(dashAction);
+        EnableInputAction(attackAction);
+        EnableInputAction(interactAction);
+        EnableInputAction(healAction);
+    }
+
+    private void EnableInputAction(InputAction action)
+    {
+        if (action == null || action.enabled)
+        {
+            return;
+        }
+
+        action.Enable();
+        enabledInputActions.Add(action);
+    }
+
+    private void DisableGameplayInput()
+    {
+        foreach (InputAction action in enabledInputActions)
+        {
+            action.Disable();
+        }
+
+        enabledInputActions.Clear();
+    }
+
+    private void DisposeOwnedInputActions()
+    {
+        DisableGameplayInput();
+
+        foreach (InputAction action in ownedInputActions)
+        {
+            action.Dispose();
+        }
+
+        ownedInputActions.Clear();
+    }
+
+    private void ReadMoveInput()
+    {
+        moveInput = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
+        moveHorizontal = moveInput.x;
+    }
+
+    private bool WasActionPressedThisFrame(InputAction action)
+    {
+        return action != null && action.WasPressedThisFrame();
+    }
 
     private IEnumerator UseHealingFlask()
     {
@@ -506,8 +690,8 @@ public class PlayerController : MonoBehaviour
 
         //float dashDuration = isGrounded ? dashingTime : 0.05f;
 
-        dashingDir = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        if (dashingDir == Vector2.zero)
+        dashingDir = moveInput;
+        if (dashingDir.sqrMagnitude < 0.01f)
         {
             dashingDir = new Vector2(isFacingRight ? 1 : -1, 0);
         }

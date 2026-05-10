@@ -16,28 +16,24 @@ public class PlayerCombat : MonoBehaviour
     public bool isAttacking {  get; private set; }
 
     private PlayerController player;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+
+    private void Awake()
     {
         player = GetComponent<PlayerController>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public IEnumerator Attack()
     {
+        PlayerController playerController = GetPlayerController();
+
         isAttacking = true;
-        if (player.IsGrounded)
+        if (playerController != null && playerController.IsGrounded)
         {
-            player.LockMovementForAttack(true);
+            playerController.LockMovementForAttack(true);
         }
         yield return new WaitForSeconds(attackStartupTime);
 
-        float verticalInput = Input.GetAxisRaw("Vertical");
+        float verticalInput = GetVerticalInput();
         Vector3 hitPosition = attackPoint.position;
         Vector2 actualBoxSize = attackBoxSize;
 
@@ -46,7 +42,7 @@ public class PlayerCombat : MonoBehaviour
             hitPosition = transform.position + Vector3.up * 1.5f;
             actualBoxSize = new Vector2(attackBoxSize.y, attackBoxSize.x);
         }
-        else if (verticalInput < -0.5f && !player.IsGrounded)
+        else if (verticalInput < -0.5f && playerController != null && !playerController.IsGrounded)
         {
             hitPosition = transform.position + Vector3.down * 1.5f;
             actualBoxSize = new Vector2(attackBoxSize.y, attackBoxSize.x);
@@ -68,7 +64,10 @@ public class PlayerCombat : MonoBehaviour
         }
         yield return new WaitForSeconds(attackRecoveryTime);
 
-        player.LockMovementForAttack(false);
+        if (playerController != null)
+        {
+            playerController.LockMovementForAttack(false);
+        }
         isAttacking = false;
     }
 
@@ -86,7 +85,8 @@ public class PlayerCombat : MonoBehaviour
             return;
         }
         Gizmos.color = Color.yellow;
-        float verticalInput = Input.GetAxisRaw("Vertical");
+        float verticalInput = GetVerticalInput();
+        PlayerController playerController = GetPlayerController();
         Vector3 debugPos = attackPoint.position;
         Vector2 debugSize = attackBoxSize;
         if (Application.isPlaying)
@@ -96,7 +96,7 @@ public class PlayerCombat : MonoBehaviour
                 debugPos = transform.position + Vector3.up * 1.5f;
                 debugSize = new Vector2(attackBoxSize.y, attackBoxSize.x);
             }
-            else if (verticalInput < -0.5f && !GetComponent<PlayerController>().IsGrounded)
+            else if (verticalInput < -0.5f && playerController != null && !playerController.IsGrounded)
             {
                 debugPos = transform.position + Vector3.down * 1.5f;
                 debugSize = new Vector2(attackBoxSize.y, attackBoxSize.x);
@@ -104,5 +104,21 @@ public class PlayerCombat : MonoBehaviour
             }
         }
         Gizmos.DrawWireCube(debugPos, debugSize);
+    }
+
+    private float GetVerticalInput()
+    {
+        PlayerController playerController = GetPlayerController();
+        return playerController != null ? playerController.VerticalInput : 0f;
+    }
+
+    private PlayerController GetPlayerController()
+    {
+        if (player == null)
+        {
+            player = GetComponent<PlayerController>();
+        }
+
+        return player;
     }
 }
