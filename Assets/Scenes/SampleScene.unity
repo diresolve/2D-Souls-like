@@ -2651,7 +2651,7 @@ GameObject:
   - component: {fileID: 1377646938}
   - component: {fileID: 1377646937}
   - component: {fileID: 1377646939}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Square (1)
   m_TagString: Hazard
   m_Icon: {fileID: 0}
@@ -3438,6 +3438,9 @@ MonoBehaviour:
   enemyLayers:
     serializedVersion: 2
     m_Bits: 64
+  hazardLayers:
+    serializedVersion: 2
+    m_Bits: 256
   attackDamage: 10
   attackStartupTime: 0.1
   attackRecoveryTime: 0.3
@@ -3732,7 +3735,7 @@ GameObject:
   - component: {fileID: 2020942178}
   - component: {fileID: 2020942177}
   - component: {fileID: 2020942179}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Square (2)
   m_TagString: Hazard
   m_Icon: {fileID: 0}
@@ -3945,7 +3948,7 @@ GameObject:
   - component: {fileID: 2126742477}
   - component: {fileID: 2126742476}
   - component: {fileID: 2126742478}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Spikes
   m_TagString: Hazard
   m_Icon: {fileID: 0}

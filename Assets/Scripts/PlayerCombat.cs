@@ -7,6 +7,7 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private Transform attackPoint;
     [SerializeField] private Vector2 attackBoxSize = new Vector2(1.5f, 1.5f);
     [SerializeField] private LayerMask enemyLayers;
+    [SerializeField] private LayerMask hazardLayers;
     [SerializeField] private int attackDamage = 10;
 
     [Header("Timing")]
@@ -25,6 +26,7 @@ public class PlayerCombat : MonoBehaviour
     public IEnumerator Attack()
     {
         PlayerController playerController = GetPlayerController();
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
 
         isAttacking = true;
         if (playerController != null && playerController.IsGrounded)
@@ -37,6 +39,8 @@ public class PlayerCombat : MonoBehaviour
         Vector3 hitPosition = attackPoint.position;
         Vector2 actualBoxSize = attackBoxSize;
 
+        bool addBounce = false;
+
         if (verticalInput > 0.5f)
         {
             hitPosition = transform.position + Vector3.up * 1.5f;
@@ -46,8 +50,23 @@ public class PlayerCombat : MonoBehaviour
         {
             hitPosition = transform.position + Vector3.down * 1.5f;
             actualBoxSize = new Vector2(attackBoxSize.y, attackBoxSize.x);
+            addBounce = true;
         }
+
+        // mozda da koristimo interface za ovo?
+
+        LayerMask bounceableLayers = enemyLayers | hazardLayers;
+        Collider2D[] hitBounceable = Physics2D.OverlapBoxAll(hitPosition, actualBoxSize, 0f, bounceableLayers);
+
+     
+        if (hitBounceable.Length > 0 && addBounce)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+            rb.AddForce(Vector2.up * playerController.UpwardBounceForce, ForceMode2D.Impulse);
+        }
+
         Collider2D[] hitEnemies = Physics2D.OverlapBoxAll(hitPosition, actualBoxSize, 0f, enemyLayers);
+
         foreach (Collider2D enemy in hitEnemies)
         {
             IDamageable damageable = enemy.GetComponent<IDamageable>();
@@ -100,7 +119,6 @@ public class PlayerCombat : MonoBehaviour
             {
                 debugPos = transform.position + Vector3.down * 1.5f;
                 debugSize = new Vector2(attackBoxSize.y, attackBoxSize.x);
-                // to do: ovo poboljsat
             }
         }
         Gizmos.DrawWireCube(debugPos, debugSize);

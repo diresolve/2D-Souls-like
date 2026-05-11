@@ -785,4 +785,5 @@ public class PlayerController : MonoBehaviour
     }
 
     public bool IsGrounded { get { return isGrounded; } }
+    public float UpwardBounceForce { get { return upwardBounceForce; } }
 }
