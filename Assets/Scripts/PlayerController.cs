@@ -51,6 +51,25 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private float flashInterval = 0.1f;
 
+    [Header("Animation")]
+    [SerializeField] private Animator animator;
+    [SerializeField] private string idleAnimationState = "Idle";
+    [SerializeField] private string runAnimationState = "Run";
+    [SerializeField] private string jumpAnimationState = "jump";
+    [SerializeField] private string jumpToFallAnimationState = "JumptoFall";
+    [SerializeField] private string fallAnimationState = "Fall";
+    [SerializeField] private string dashAnimationState = "Dash";
+    [SerializeField] private string dashAttackAnimationState = "Dash-Attack";
+    [SerializeField] private string wallSlideAnimationState = "Wall-Slide";
+    [SerializeField] private string attackAnimationState = "Attack";
+    [SerializeField] private string hurtAnimationState = "Hurt";
+    [SerializeField] private string deathAnimationState = "Death";
+    [SerializeField] private float animationMoveThreshold = 0.05f;
+    [SerializeField] private float attackAnimationClipLength = 1.2f;
+    [SerializeField] private float dashAttackAnimationClipLength = 1f;
+    [SerializeField] private float jumpToFallAnimationClipLength = 0.2f;
+    [SerializeField] private float jumpToFallVelocityThreshold = 0.05f;
+
     // stamina system
     [Header("Stamina")]
     [SerializeField] private UnityEngine.UI.Slider staminaBar;
@@ -70,9 +89,18 @@ public class PlayerController : MonoBehaviour
     [Header("Dashing")]
     [SerializeField] private float dashingVelocity = 24f;
     [SerializeField] private float dashingTime = 0.02f;
+    [SerializeField] private float dashInvulnerabilityTime = 0.2f;
+    [SerializeField] private float dashAttackInputWindow = 0.25f;
+    [SerializeField] private float dashAttackStaminaCost = 15f;
     private Vector2 dashingDir;
     private bool isDashing;
     private bool canDash = true;
+
+    [Header("Wall Slide")]
+    [SerializeField] private LayerMask wallLayer;
+    [SerializeField] private float wallCheckDistance = 0.1f;
+    [SerializeField] private float wallSlideMaxFallSpeed = 3f;
+    [SerializeField] private float wallSlideInputThreshold = 0.1f;
 
     private Rigidbody2D rb2D;
 
@@ -91,6 +119,7 @@ public class PlayerController : MonoBehaviour
     private float originalMaxSpeed;
 
     private bool isInvulnerable = false;
+    private bool isDashInvulnerable = false;
 
     private int currentHealth;
 
@@ -116,6 +145,16 @@ public class PlayerController : MonoBehaviour
     private InputAction interactAction;
     private InputAction healAction;
     private Vector2 moveInput;
+    private string currentAnimationState;
+    private int lastAnimatedAttackSequence;
+    private int lastAnimatedDashAttackSequence;
+    private bool hasMovedUpThisAirborne;
+    private bool hasPlayedJumpToFallThisAirborne;
+    private float jumpToFallEndsAt;
+    private bool isWallSliding;
+    private float lastDashStartedAt = float.NegativeInfinity;
+    private bool hasUsedDashAttackThisDash;
+    private Coroutine dashInvulnerabilityCoroutine;
 
     private void Awake()
     {
@@ -131,6 +170,7 @@ public class PlayerController : MonoBehaviour
     private void OnDisable()
     {
         DisableGameplayInput();
+        isDashInvulnerable = false;
     }
 
     private void OnDestroy()
@@ -143,6 +183,7 @@ public class PlayerController : MonoBehaviour
         _gameOverScreen.SetActive(false);
         rb2D = gameObject.GetComponent<Rigidbody2D>();
         rb2D.sleepMode = RigidbodySleepMode2D.NeverSleep;
+        InitializeAnimationReferences();
         originalMaxSpeed = maxMoveSpeed;
         currentHealth = maxHealth;
 
@@ -162,6 +203,10 @@ public class PlayerController : MonoBehaviour
 
         originalJumpForce = jumpForce;
         originalGravityScale = rb2D.gravityScale;
+        if (wallLayer.value == 0)
+        {
+            wallLayer = groundLayer | LayerMask.GetMask("Default");
+        }
 
         RespawnSouls();
 
@@ -179,16 +224,30 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (isDead) return;
+        if (isDead)
+        {
+            UpdateAnimationState();
+            return;
+        }
 
         HandleStaminaRegen();
         ReadMoveInput();
+        UpdateAnimationState();
+
+        if (TryStartDashAttack())
+        {
+            UpdateAnimationState();
+            return;
+        }
 
         if (isDashing) return;
+
+        TryQueueAttack();
 
         if (!canMove)
         {
             moveHorizontal = 0f;
+            UpdateAnimationState();
             return;
         }
 
@@ -217,30 +276,25 @@ public class PlayerController : MonoBehaviour
             
         }
 
-        if (WasActionPressedThisFrame(attackAction) && !isDashing /*&& isGrounded && !isDashing*/)
-        {
-            if (combatScript != null && !combatScript.isAttacking)
-            {
-                if (canConsumeStamina(15f))
-                {
-                    StartCoroutine(combatScript.Attack());
-                }
-            }
-        }
-
         TurnCheck();
+        UpdateAnimationState();
 
     }
 
     private void FixedUpdate()
     {
         if (isDead) return;
-        if (isDashing) return;
+        if (isDashing)
+        {
+            isWallSliding = false;
+            return;
+        }
 
         if (feetCollider != null)
         {
             isGrounded = feetCollider.IsTouchingLayers(groundLayer);
         }
+        UpdateWallSlideState();
         // pokusaj fixanja
 
         bool isTouchingWallAhead = false;
@@ -304,6 +358,11 @@ public class PlayerController : MonoBehaviour
             rb2D.linearVelocity = new Vector2(rb2D.linearVelocity.x, terminalVelocity);
         }
 
+        if (isWallSliding && rb2D.linearVelocity.y < -wallSlideMaxFallSpeed)
+        {
+            rb2D.linearVelocity = new Vector2(rb2D.linearVelocity.x, -wallSlideMaxFallSpeed);
+        }
+
         if (isGrounded && rb2D.linearVelocity.y <= 0.01f)
         {
             canDash = true;
@@ -357,6 +416,240 @@ public class PlayerController : MonoBehaviour
 
     public bool IsFacingRight { get { return isFacingRight; } }
     public float VerticalInput { get { return moveInput.y; } }
+    private bool IsCurrentlyInvulnerable { get { return isInvulnerable || isDashInvulnerable; } }
+
+    private void UpdateWallSlideState()
+    {
+        isWallSliding = false;
+
+        if (rb2D == null || bodyCollider == null || isGrounded || !canMove || Mathf.Abs(moveHorizontal) < wallSlideInputThreshold)
+        {
+            return;
+        }
+
+        if (rb2D.linearVelocity.y >= 0f)
+        {
+            return;
+        }
+
+        int moveDirection = moveHorizontal > 0f ? 1 : -1;
+        isWallSliding = IsTouchingWall(moveDirection);
+    }
+
+    private bool IsTouchingWall(int direction)
+    {
+        int checkedWallLayer = (wallLayer.value != 0 ? wallLayer.value : groundLayer.value) | LayerMask.GetMask("Default");
+        Bounds bodyBounds = bodyCollider.bounds;
+        Vector2 boxCastSize = new Vector2(bodyBounds.size.x * 0.9f, bodyBounds.size.y * 0.8f);
+
+        RaycastHit2D[] hits = Physics2D.BoxCastAll(
+            bodyBounds.center,
+            boxCastSize,
+            0f,
+            new Vector2(direction, 0f),
+            wallCheckDistance,
+            checkedWallLayer
+        );
+
+        foreach (RaycastHit2D hit in hits)
+        {
+            if (hit.collider != null && !hit.collider.isTrigger && hit.collider != bodyCollider)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool TryStartDashAttack()
+    {
+        if (!WasActionPressedThisFrame(attackAction) || combatScript == null || !combatScript.CanStartDashAttack)
+        {
+            return false;
+        }
+
+        bool isInDashAttackWindow = isDashing || Time.time <= lastDashStartedAt + dashAttackInputWindow;
+        if (!isInDashAttackWindow || (!isDashing && !canMove) || hasUsedDashAttackThisDash || !canConsumeStamina(dashAttackStaminaCost))
+        {
+            return false;
+        }
+
+        hasUsedDashAttackThisDash = true;
+        combatScript.StartDashAttack();
+        return true;
+    }
+
+    private void TryQueueAttack()
+    {
+        if (!WasActionPressedThisFrame(attackAction) || combatScript == null || !combatScript.CanQueueAttack)
+        {
+            return;
+        }
+
+        bool canStartOrContinueAttack = canMove || combatScript.isAttacking;
+        if (!canStartOrContinueAttack || !canConsumeStamina(15f))
+        {
+            return;
+        }
+
+        combatScript.QueueAttack();
+    }
+
+    private void InitializeAnimationReferences()
+    {
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+        }
+
+        if (animator == null)
+        {
+            return;
+        }
+
+        SpriteRenderer animatedSpriteRenderer = animator.GetComponent<SpriteRenderer>();
+        if (animatedSpriteRenderer != null)
+        {
+            spriteRenderer = animatedSpriteRenderer;
+        }
+
+        attackAnimationClipLength = GetAnimationClipLength(attackAnimationState, attackAnimationClipLength);
+        dashAttackAnimationClipLength = GetAnimationClipLength(dashAttackAnimationState, dashAttackAnimationClipLength);
+        jumpToFallAnimationClipLength = GetAnimationClipLength(jumpToFallAnimationState, jumpToFallAnimationClipLength);
+    }
+
+    private void UpdateAnimationState()
+    {
+        if (animator == null)
+        {
+            return;
+        }
+
+        if (isDead)
+        {
+            PlayAnimationState(deathAnimationState);
+            return;
+        }
+
+        if (combatScript != null && combatScript.IsDashAttacking)
+        {
+            float dashAttackDuration = Mathf.Max(combatScript.DashAttackDuration, 0.01f);
+            bool isNewDashAttack = lastAnimatedDashAttackSequence != combatScript.DashAttackSequence;
+            PlayAnimationState(dashAttackAnimationState, dashAttackAnimationClipLength / dashAttackDuration, isNewDashAttack);
+            lastAnimatedDashAttackSequence = combatScript.DashAttackSequence;
+            return;
+        }
+
+        if (combatScript != null && combatScript.isAttacking)
+        {
+            float attackDuration = Mathf.Max(combatScript.AttackDuration, 0.01f);
+            bool isNewAttack = lastAnimatedAttackSequence != combatScript.AttackSequence;
+            PlayAnimationState(attackAnimationState, attackAnimationClipLength / attackDuration, isNewAttack);
+            lastAnimatedAttackSequence = combatScript.AttackSequence;
+            return;
+        }
+
+        if (isDashing)
+        {
+            PlayAnimationState(dashAnimationState);
+            return;
+        }
+
+        if (isInvulnerable && !canMove)
+        {
+            PlayAnimationState(hurtAnimationState);
+            return;
+        }
+
+        if (isWallSliding)
+        {
+            hasPlayedJumpToFallThisAirborne = true;
+            jumpToFallEndsAt = 0f;
+            PlayAnimationState(wallSlideAnimationState);
+            return;
+        }
+
+        float verticalVelocity = rb2D != null ? rb2D.linearVelocity.y : 0f;
+        if (!isGrounded)
+        {
+            if (verticalVelocity > jumpToFallVelocityThreshold)
+            {
+                hasMovedUpThisAirborne = true;
+                hasPlayedJumpToFallThisAirborne = false;
+                PlayAnimationState(jumpAnimationState);
+                return;
+            }
+
+            if (hasMovedUpThisAirborne && !hasPlayedJumpToFallThisAirborne)
+            {
+                hasPlayedJumpToFallThisAirborne = true;
+                jumpToFallEndsAt = Time.time + jumpToFallAnimationClipLength;
+                PlayAnimationState(jumpToFallAnimationState);
+                return;
+            }
+
+            if (hasPlayedJumpToFallThisAirborne && Time.time < jumpToFallEndsAt)
+            {
+                PlayAnimationState(jumpToFallAnimationState);
+                return;
+            }
+
+            PlayAnimationState(fallAnimationState);
+            return;
+        }
+
+        hasMovedUpThisAirborne = false;
+        hasPlayedJumpToFallThisAirborne = false;
+        jumpToFallEndsAt = 0f;
+
+        if (Mathf.Abs(moveHorizontal) > animationMoveThreshold)
+        {
+            PlayAnimationState(runAnimationState);
+            return;
+        }
+
+        PlayAnimationState(idleAnimationState);
+    }
+
+    private float GetAnimationClipLength(string clipName, float fallbackLength)
+    {
+        if (animator.runtimeAnimatorController == null || string.IsNullOrWhiteSpace(clipName))
+        {
+            return fallbackLength;
+        }
+
+        foreach (AnimationClip clip in animator.runtimeAnimatorController.animationClips)
+        {
+            if (clip.name == clipName)
+            {
+                return clip.length;
+            }
+        }
+
+        return fallbackLength;
+    }
+
+    private void PlayAnimationState(string stateName, float playbackSpeed = 1f, bool forceRestart = false)
+    {
+        if (string.IsNullOrWhiteSpace(stateName))
+        {
+            return;
+        }
+
+        if (currentAnimationState == stateName && !forceRestart)
+        {
+            if (animator.speed != playbackSpeed)
+            {
+                animator.speed = playbackSpeed;
+            }
+            return;
+        }
+
+        animator.speed = playbackSpeed;
+        animator.Play(stateName, 0, 0f);
+        currentAnimationState = stateName;
+    }
 
     private void InitializeInputActions()
     {
@@ -526,7 +819,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleHazardCollision(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Hazard") && !isInvulnerable)
+        if (collision.gameObject.CompareTag("Hazard") && !IsCurrentlyInvulnerable)
         {
             if (isDashing)
             {
@@ -724,6 +1017,9 @@ public class PlayerController : MonoBehaviour
 
         canDash = false;
         isDashing = true;
+        lastDashStartedAt = Time.time;
+        hasUsedDashAttackThisDash = false;
+        StartDashInvulnerability();
 
         float originalGravity = rb2D.gravityScale;
         rb2D.gravityScale = 0f;
@@ -742,6 +1038,29 @@ public class PlayerController : MonoBehaviour
         rb2D.gravityScale = originalGravity;
         //rb2D.linearVelocity = new Vector2(rb2D.linearVelocity.x * 0.8f, 0f);
         isDashing = false;
+    }
+
+    private void StartDashInvulnerability()
+    {
+        if (dashInvulnerabilityTime <= 0f)
+        {
+            return;
+        }
+
+        if (dashInvulnerabilityCoroutine != null)
+        {
+            StopCoroutine(dashInvulnerabilityCoroutine);
+        }
+
+        dashInvulnerabilityCoroutine = StartCoroutine(DashInvulnerabilityRoutine());
+    }
+
+    private IEnumerator DashInvulnerabilityRoutine()
+    {
+        isDashInvulnerable = true;
+        yield return new WaitForSeconds(dashInvulnerabilityTime);
+        isDashInvulnerable = false;
+        dashInvulnerabilityCoroutine = null;
     }
 
     private void HandleStaminaRegen()

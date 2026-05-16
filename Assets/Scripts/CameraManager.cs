@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using Unity.Cinemachine;
+using UnityEngine.InputSystem;
 
 public class CameraManager : MonoBehaviour
 {
@@ -13,6 +14,11 @@ public class CameraManager : MonoBehaviour
     [SerializeField] private float _fallYPanTime = 0.35f;
     [SerializeField] private float _fallSpeedYDampingChangeThreshold = -6f;
 
+    [Header("Playtest Debug Controls")]
+    [SerializeField] private bool enablePlaytestDebugControls = true;
+    [SerializeField] private float playtestZoomOrthographicSize = 4f;
+    [SerializeField] private float playtestSlowMotionScale = 0.25f;
+
     public bool IsLerpingYDamping { get; private set; }
     public bool LerpedFromPlayerFalling { get; set; }
 
@@ -21,6 +27,11 @@ public class CameraManager : MonoBehaviour
     private CinemachineCamera _currentCamera;
 
     private float _normYPanAmount;
+    private float _normalOrthographicSize;
+    private float _normalFixedDeltaTime;
+    private bool _hasCapturedPlaytestDefaults;
+    private bool _isPlaytestZoomed;
+    private bool _isPlaytestSlowMotion;
 
     private void Awake()
     {
@@ -43,6 +54,23 @@ public class CameraManager : MonoBehaviour
         {
             _normYPanAmount = _positionComposer.Damping.y;
         }
+
+        CapturePlaytestDefaults();
+    }
+
+    private void Update()
+    {
+        HandlePlaytestDebugControls();
+    }
+
+    private void OnDisable()
+    {
+        ResetPlaytestDebugState();
+    }
+
+    private void OnDestroy()
+    {
+        ResetPlaytestDebugState();
     }
 
     public void LerpYDamping(bool isPlayerFalling)
@@ -98,5 +126,90 @@ public class CameraManager : MonoBehaviour
     public float FallSpeedYDampingChangeThreshold
     {
         get { return _fallSpeedYDampingChangeThreshold; }
+    }
+
+    private void HandlePlaytestDebugControls()
+    {
+        if (!enablePlaytestDebugControls || Keyboard.current == null)
+        {
+            return;
+        }
+
+        if (Keyboard.current.zKey.wasPressedThisFrame)
+        {
+            TogglePlaytestZoom();
+        }
+
+        if (Keyboard.current.tKey.wasPressedThisFrame)
+        {
+            TogglePlaytestSlowMotion();
+        }
+
+        if (Keyboard.current.xKey.wasPressedThisFrame)
+        {
+            ResetPlaytestDebugState();
+        }
+    }
+
+    private void CapturePlaytestDefaults()
+    {
+        if (_currentCamera == null)
+        {
+            return;
+        }
+
+        _normalOrthographicSize = _currentCamera.Lens.OrthographicSize;
+        _normalFixedDeltaTime = Time.fixedDeltaTime;
+        _hasCapturedPlaytestDefaults = true;
+    }
+
+    private void TogglePlaytestZoom()
+    {
+        if (_currentCamera == null)
+        {
+            return;
+        }
+
+        if (!_hasCapturedPlaytestDefaults)
+        {
+            CapturePlaytestDefaults();
+        }
+
+        _isPlaytestZoomed = !_isPlaytestZoomed;
+        _currentCamera.Lens.OrthographicSize = _isPlaytestZoomed
+            ? playtestZoomOrthographicSize
+            : _normalOrthographicSize;
+    }
+
+    private void TogglePlaytestSlowMotion()
+    {
+        if (!_hasCapturedPlaytestDefaults)
+        {
+            CapturePlaytestDefaults();
+        }
+
+        _isPlaytestSlowMotion = !_isPlaytestSlowMotion;
+
+        float targetTimeScale = _isPlaytestSlowMotion ? playtestSlowMotionScale : 1f;
+        Time.timeScale = targetTimeScale;
+        Time.fixedDeltaTime = _normalFixedDeltaTime * targetTimeScale;
+    }
+
+    private void ResetPlaytestDebugState()
+    {
+        if (!_hasCapturedPlaytestDefaults)
+        {
+            return;
+        }
+
+        if (_currentCamera != null)
+        {
+            _currentCamera.Lens.OrthographicSize = _normalOrthographicSize;
+        }
+
+        Time.timeScale = 1f;
+        Time.fixedDeltaTime = _normalFixedDeltaTime;
+        _isPlaytestZoomed = false;
+        _isPlaytestSlowMotion = false;
     }
 }
