@@ -16284,7 +16284,7 @@ MonoBehaviour:
   currentStamina: 0
   lastStaminaUse: 0
   currentSouls: 0
-  drop: {fileID: 8324130531004165683, guid: 6d2b33871b1876744835c6b2d1265108, type: 3}
+  drop: {fileID: 7365746531202262184, guid: 99df27f67d9632f48aa20d44d1e1f904, type: 3}
   dashingVelocity: 24
   dashingTime: 0.02
   dashInvulnerabilityTime: 0.2
