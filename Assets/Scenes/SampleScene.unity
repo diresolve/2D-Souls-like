@@ -947,15 +947,15 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: -3318188226485093758, guid: ae72133dacba6ec4eb33ecde48f50e56, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.69, y: 0.44}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
 --- !u!1 &405119736
 GameObject:
@@ -22032,7 +22032,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 0.81886786, g: 0.20857947, b: 0.35597628, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -22040,7 +22040,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!4 &1866114886
 Transform:
@@ -22093,8 +22093,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 1}
+  m_Offset: {x: -0.22, y: -0.1}
+  m_Size: {x: 0.5, y: 0.9}
   m_Direction: 0
 --- !u!50 &1866114888
 Rigidbody2D:
@@ -22168,7 +22168,7 @@ MonoBehaviour:
   maxHealth: 100
   spriteRenderer: {fileID: 1866114885}
   flashInterval: 0.1
-  animator: {fileID: 0}
+  animator: {fileID: 397775669}
   idleAnimationState: Idle
   runAnimationState: Run
   jumpAnimationState: jump
@@ -22240,7 +22240,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: -0.51120245}
+  m_Offset: {x: -0.24, y: -0.64}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -22250,7 +22250,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 0.016468942}
+  m_Size: {x: 0.37, y: 0.01}
   m_EdgeRadius: 0
 --- !u!114 &1866114891
 MonoBehaviour:
