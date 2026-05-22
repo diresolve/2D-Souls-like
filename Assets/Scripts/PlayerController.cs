@@ -895,6 +895,38 @@ public class PlayerController : MonoBehaviour
         {
             currentInteractableDoor = collision.GetComponent<HeavyDoor>();
         }
+        else if (collision.gameObject.CompareTag("EnemySword") && !IsCurrentlyInvulnerable)
+        {
+            if (isDashing)
+            {
+                isDashing = false;
+                rb2D.gravityScale = originalGravityScale;
+            }
+            canMove = false;
+            isInvulnerable = true;
+            TakeDamage(25);
+            if (isDead) return;
+            rb2D.linearVelocity = Vector2.zero;
+            float knockbackDirection = transform.position.x < collision.transform.position.x ? -1f : 1f;
+            rb2D.AddForce(new Vector2(damageKnockback.x * knockbackDirection, damageKnockback.y), ForceMode2D.Impulse);
+
+            StartCoroutine(StunRecovery());
+            StartCoroutine(InvulnerabilityRoutine());
+            if (collision.gameObject.CompareTag("Swamp"))
+            {
+                maxMoveSpeed = originalMaxSpeed * swampSpeedMultiplier;
+                jumpForce = originalJumpForce * swampJumpMultiplier;
+            }
+            else if (collision.gameObject.CompareTag("GravityZone"))
+            {
+                rb2D.gravityScale = alteredGravityScale;
+            }
+            else if (collision.gameObject.CompareTag("Interactable"))
+            {
+                currentInteractableDoor = collision.GetComponent<HeavyDoor>();
+            }
+
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)

@@ -11,6 +11,7 @@ TagManager:
   - GravityZone
   - Interactable
   - Enemy
+  - EnemySword
   layers:
   - Default
   - TransparentFX
