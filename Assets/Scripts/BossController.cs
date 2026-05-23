@@ -30,6 +30,10 @@ public class BossController : MonoBehaviour, IDamageable
     [Header("Arena Event")]
     [SerializeField] private BossArenaTrigger arenaTrigger;
 
+    [Header("Death")]
+    [SerializeField] private float deathFloatHeight = 1.5f;
+    [SerializeField] private float deathFloatDuration = 1.1f;
+
     //private int currentHealth;
     private Rigidbody2D boss;
     private float nextAttackTime = 0f;
@@ -168,9 +172,30 @@ public class BossController : MonoBehaviour, IDamageable
         currentState = State.Dead;
         animator.SetBool("Dead", true);
         boss.linearVelocity = Vector2.zero;
-        GetComponent<Rigidbody2D>().gravityScale = 0f;
+        boss.gravityScale = 0f;
+
+        DisableWeapon();
 
         GetComponent<Collider2D>().enabled = false;
+        StartCoroutine(FloatUpOnDeath());
+    }
+
+    private IEnumerator FloatUpOnDeath()
+    {
+        Vector3 startPosition = transform.position;
+        Vector3 endPosition = startPosition + Vector3.up * deathFloatHeight;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < deathFloatDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsedTime / deathFloatDuration);
+            float easedT = 1f - Mathf.Pow(1f - t, 2f);
+            transform.position = Vector3.Lerp(startPosition, endPosition, easedT);
+            yield return null;
+        }
+
+        transform.position = endPosition;
     }
 
     public void TakeDamage(int amount, Vector2 attackDirection)

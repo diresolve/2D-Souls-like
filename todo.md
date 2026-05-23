@@ -6,6 +6,7 @@
 - [ ] Boss gets faster movement and faster attacks at lower health
 - [ ] Attack pattern
 - [ ] Special attack
+- [ ] Increase boss attack hitbox
 - [ ] Screen shake on boss attacks
 - [ ] Money drop on boss death
 
@@ -13,7 +14,7 @@
 
 - [ ] Health bar should be empty when health is empty
 - [ ] Clipping into ground on steps
-- [ ] Boss death animation should float up, not down
+- [x] Boss death animation should float up, not stay in place
 
 ## Add Later
 
