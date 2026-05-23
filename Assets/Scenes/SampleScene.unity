@@ -22229,9 +22229,14 @@ MonoBehaviour:
   animator: {fileID: 1378997895}
   spriteRenderer: {fileID: 1378997896}
   bossWeapon: {fileID: 2119290882}
+  bossWeaponHitboxSize: {x: 5.5, y: 3.8}
+  bossWeaponHitboxOffset: {x: 0.65, y: 1.2}
   currentHealth: 0
+  showBossWeaponHitboxGizmo: 1
   healthBar: {fileID: 535289252}
   arenaTrigger: {fileID: 638731923}
+  deathFloatHeight: 1.5
+  deathFloatDuration: 1.1
 --- !u!1001 &1461493805
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -23502,7 +23507,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
   attackPoint: {fileID: 957503782}
-  attackBoxSize: {x: 3, y: 1.5}
+  attackBoxSize: {x: 1.5, y: 1.5}
   enemyLayers:
     serializedVersion: 2
     m_Bits: 64
@@ -27163,7 +27168,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.33301616, y: 1.2060013}
+  m_Offset: {x: 0.65, y: 1.2}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -27173,7 +27178,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 4.3301697, y: 3.5560036}
+  m_Size: {x: 5.5, y: 3.8}
   m_EdgeRadius: 0
 --- !u!1 &2126742475
 GameObject:
