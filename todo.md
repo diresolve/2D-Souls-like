@@ -18,7 +18,7 @@
 
 ## Add Later
 
-- [ ] Checkpoint animation
+- [x] Checkpoint animation
 - [ ] Coin count on screen
 - [ ] Save point
 - [ ] Level up system
