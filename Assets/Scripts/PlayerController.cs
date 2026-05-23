@@ -189,16 +189,28 @@ public class PlayerController : MonoBehaviour
 
         if (healthBar != null)
         {
+            healthBar.minValue = 0f;
             healthBar.maxValue = maxHealth;
-            healthBar.value = currentHealth;
+            healthBar.interactable = false;
+            if (healthBar.handleRect != null)
+            {
+                healthBar.handleRect.gameObject.SetActive(false);
+            }
+            UpdateHealthBar();
         }
 
         currentStamina = maxStamina;
 
         if (staminaBar != null)
         {
+            staminaBar.minValue = 0f;
             staminaBar.maxValue = maxStamina;
-            staminaBar.value = currentStamina;
+            staminaBar.interactable = false;
+            if (staminaBar.handleRect != null)
+            {
+                staminaBar.handleRect.gameObject.SetActive(false);
+            }
+            UpdateStaminaBar();
         }
 
         originalJumpForce = jumpForce;
@@ -267,7 +279,7 @@ public class PlayerController : MonoBehaviour
             StartCoroutine(PerformInteraction());
         }
 
-        if (WasActionPressedThisFrame(dashAction) && canDash && currentStamina >= dashStaminaCost)
+        if (WasActionPressedThisFrame(dashAction) && canDash && currentStamina > 0f)
         {
             if (canConsumeStamina(dashStaminaCost))
             {
@@ -951,16 +963,26 @@ public class PlayerController : MonoBehaviour
 
     private void TakeDamage(int damageAmount)
     {
-        currentHealth -= damageAmount;
-
-        if (healthBar != null)
-        {
-            healthBar.value = currentHealth;
-        }
+        currentHealth = Mathf.Max(currentHealth - damageAmount, 0);
+        UpdateHealthBar();
 
         if (currentHealth <= 0)
         {
             Die();
+        }
+    }
+
+    private void UpdateHealthBar()
+    {
+        if (healthBar != null)
+        {
+            float clampedHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+            healthBar.value = clampedHealth;
+
+            if (healthBar.fillRect != null)
+            {
+                healthBar.fillRect.gameObject.SetActive(clampedHealth > 0f);
+            }
         }
     }
 
@@ -1100,13 +1122,10 @@ public class PlayerController : MonoBehaviour
         if (currentStamina < maxStamina && Time.time >= lastStaminaUse + staminaRegenDelay)
         {
             currentStamina += staminaRegenRate * Time.deltaTime;
-            currentStamina = Mathf.Clamp(currentStamina, 0f, maxStamina);
+            currentStamina = Mathf.Min(currentStamina, maxStamina);
         }
 
-        if (staminaBar != null)
-        {
-            staminaBar.value = currentStamina;
-        }
+        UpdateStaminaBar();
     }
 
     public void LockMovementForAttack(bool isLocked)
@@ -1121,18 +1140,29 @@ public class PlayerController : MonoBehaviour
 
     public bool canConsumeStamina(float amount)
     {
-        if (currentStamina >= amount)
+        if (currentStamina > 0f)
         {
             currentStamina -= amount;
             lastStaminaUse = Time.time;
 
-            if (staminaBar != null)
-            {
-                staminaBar.value = currentStamina;
-            }
+            UpdateStaminaBar();
             return true;
         }
         return false;
+    }
+
+    private void UpdateStaminaBar()
+    {
+        if (staminaBar != null)
+        {
+            float clampedStamina = Mathf.Clamp(currentStamina, 0f, maxStamina);
+            staminaBar.value = clampedStamina;
+
+            if (staminaBar.fillRect != null)
+            {
+                staminaBar.fillRect.gameObject.SetActive(clampedStamina > 0f);
+            }
+        }
     }
 
     public bool IsGrounded { get { return isGrounded; } }

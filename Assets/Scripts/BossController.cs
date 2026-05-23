@@ -51,8 +51,14 @@ public class BossController : MonoBehaviour, IDamageable
 
         if (healthBar != null)
         {
+            healthBar.minValue = 0f;
             healthBar.maxValue = maxHealth;
-            healthBar.value = currentHealth;
+            healthBar.interactable = false;
+            if (healthBar.handleRect != null)
+            {
+                healthBar.handleRect.gameObject.SetActive(false);
+            }
+            UpdateHealthBar();
         }
 
     }
@@ -202,7 +208,8 @@ public class BossController : MonoBehaviour, IDamageable
     {
         if (currentState == State.Dead) return;
 
-        currentHealth -= amount;
+        currentHealth = Mathf.Max(currentHealth - amount, 0);
+        UpdateHealthBar();
 
         StartCoroutine(DamageFlash());
 
@@ -215,9 +222,19 @@ public class BossController : MonoBehaviour, IDamageable
             animator.SetTrigger("Hurt"); 
         }
 
+    }
+
+    private void UpdateHealthBar()
+    {
         if (healthBar != null)
         {
-            healthBar.value = currentHealth;
+            float clampedHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+            healthBar.value = clampedHealth;
+
+            if (healthBar.fillRect != null)
+            {
+                healthBar.fillRect.gameObject.SetActive(clampedHealth > 0f);
+            }
         }
     }
 
