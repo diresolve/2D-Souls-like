@@ -13,7 +13,7 @@
 ## Fixes
 
 - [x] Health bar should be empty when health is empty
-- [ ] Clipping into ground on steps
+- [x] Clipping into ground on steps
 - [x] Boss death animation should float up, not stay in place
 
 ## Add Later
