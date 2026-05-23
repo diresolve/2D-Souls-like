@@ -24,6 +24,12 @@ public class BossController : MonoBehaviour, IDamageable
     [SerializeField] private GameObject bossWeapon;
     [SerializeField] private int currentHealth;
 
+    [Header("Heavy Attack")]
+    [SerializeField] private int normalAttackDamage = 25;
+    [SerializeField] private float heavyAttackDamageMultiplier = 1.5f;
+    [SerializeField] private float heavyAttackAnimationSpeed = 0.5f;
+    [SerializeField] private float heavyAttackCooldown = 6f;
+
     [Header("UI")]
     [SerializeField] private UnityEngine.UI.Slider healthBar;
 
@@ -36,7 +42,9 @@ public class BossController : MonoBehaviour, IDamageable
 
     //private int currentHealth;
     private Rigidbody2D boss;
+    private BossWeaponDamage bossWeaponDamage;
     private float nextAttackTime = 0f;
+    private float nextHeavyAttackTime = 0f;
     private bool isFacingRight = false;
 
     void Start()
@@ -61,6 +69,7 @@ public class BossController : MonoBehaviour, IDamageable
             UpdateHealthBar();
         }
 
+        InitializeBossWeaponDamage();
     }
 
     void Update()
@@ -90,7 +99,8 @@ public class BossController : MonoBehaviour, IDamageable
                 {
                     if (Time.time >= nextAttackTime)
                     {
-                        StartCoroutine(AttackRoutine());
+                        bool useHeavyAttack = Time.time >= nextHeavyAttackTime;
+                        StartCoroutine(AttackRoutine(useHeavyAttack));
                     }
                     else
                     {
@@ -110,6 +120,22 @@ public class BossController : MonoBehaviour, IDamageable
         }
     }
 
+    private void InitializeBossWeaponDamage()
+    {
+        if (bossWeapon == null)
+        {
+            return;
+        }
+
+        bossWeaponDamage = bossWeapon.GetComponent<BossWeaponDamage>();
+        if (bossWeaponDamage == null)
+        {
+            bossWeaponDamage = bossWeapon.AddComponent<BossWeaponDamage>();
+        }
+
+        bossWeaponDamage.SetDamage(normalAttackDamage);
+    }
+
     public void EnableWeapon()
     {
         if (bossWeapon != null)
@@ -123,6 +149,19 @@ public class BossController : MonoBehaviour, IDamageable
         if (bossWeapon != null)
         {
             bossWeapon.SetActive(false);
+        }
+    }
+
+    private void SetBossWeaponDamage(int damage)
+    {
+        if (bossWeaponDamage == null)
+        {
+            InitializeBossWeaponDamage();
+        }
+
+        if (bossWeaponDamage != null)
+        {
+            bossWeaponDamage.SetDamage(damage);
         }
     }
 
@@ -141,15 +180,29 @@ public class BossController : MonoBehaviour, IDamageable
             Flip();
     }
 
-    private IEnumerator AttackRoutine()
+    private IEnumerator AttackRoutine(bool isHeavyAttack)
     {
         currentState = State.Attacking;
         animator.SetFloat("Speed", 0f);
+
+        int attackDamage = isHeavyAttack
+            ? Mathf.RoundToInt(normalAttackDamage * heavyAttackDamageMultiplier)
+            : normalAttackDamage;
+        float attackAnimationSpeed = isHeavyAttack ? Mathf.Max(heavyAttackAnimationSpeed, 0.01f) : 1f;
+
+        SetBossWeaponDamage(attackDamage);
+        animator.speed = attackAnimationSpeed;
         animator.SetTrigger("Attack");
 
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1.5f / attackAnimationSpeed);
 
+        animator.speed = 1f;
+        SetBossWeaponDamage(normalAttackDamage);
         nextAttackTime = Time.time + attackCooldown;
+        if (isHeavyAttack)
+        {
+            nextHeavyAttackTime = Time.time + heavyAttackCooldown;
+        }
         currentState = State.Idle; 
     }
 
@@ -176,6 +229,7 @@ public class BossController : MonoBehaviour, IDamageable
         //    healthBar.gameObject.SetActive(false);
         //}
         currentState = State.Dead;
+        animator.speed = 1f;
         animator.SetBool("Dead", true);
         boss.linearVelocity = Vector2.zero;
         boss.gravityScale = 0f;
@@ -244,5 +298,17 @@ public class BossController : MonoBehaviour, IDamageable
         {
             spriteRenderer.enabled = false;
         }
+    }
+}
+
+public class BossWeaponDamage : MonoBehaviour
+{
+    [SerializeField] private int damage = 25;
+
+    public int Damage { get { return damage; } }
+
+    public void SetDamage(int value)
+    {
+        damage = Mathf.Max(value, 0);
     }
 }

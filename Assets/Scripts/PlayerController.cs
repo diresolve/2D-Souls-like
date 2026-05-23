@@ -921,7 +921,14 @@ public class PlayerController : MonoBehaviour
             }
             canMove = false;
             isInvulnerable = true;
-            TakeDamage(25);
+            int enemySwordDamage = 25;
+            BossWeaponDamage weaponDamage = collision.GetComponent<BossWeaponDamage>();
+            if (weaponDamage != null)
+            {
+                enemySwordDamage = weaponDamage.Damage;
+            }
+
+            TakeDamage(enemySwordDamage);
             if (isDead) return;
             rb2D.linearVelocity = Vector2.zero;
             float knockbackDirection = transform.position.x < collision.transform.position.x ? -1f : 1f;
