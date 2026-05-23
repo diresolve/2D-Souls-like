@@ -1464,7 +1464,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0ad7b2a989b2764083a86b4872424c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LostSoul
+  isDeathRetrieval: 0
   soulValue: 10
+  animator: {fileID: 0}
+  appearDistance: 8
+  shatterAnimDuration: 0.5
 --- !u!58 &200004515
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -3054,7 +3058,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0ad7b2a989b2764083a86b4872424c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LostSoul
+  isDeathRetrieval: 0
   soulValue: 10
+  animator: {fileID: 0}
+  appearDistance: 8
+  shatterAnimDuration: 0.5
 --- !u!58 &354904090
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -3251,7 +3259,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0ad7b2a989b2764083a86b4872424c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LostSoul
+  isDeathRetrieval: 0
   soulValue: 10
+  animator: {fileID: 0}
+  appearDistance: 8
+  shatterAnimDuration: 0.5
 --- !u!58 &405119739
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -13455,7 +13467,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0ad7b2a989b2764083a86b4872424c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LostSoul
+  isDeathRetrieval: 0
   soulValue: 10
+  animator: {fileID: 0}
+  appearDistance: 8
+  shatterAnimDuration: 0.5
 --- !u!58 &940346103
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -34370,7 +34386,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0ad7b2a989b2764083a86b4872424c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LostSoul
+  isDeathRetrieval: 0
   soulValue: 10
+  animator: {fileID: 0}
+  appearDistance: 8
+  shatterAnimDuration: 0.5
 --- !u!58 &1264600451
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -35748,7 +35768,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0ad7b2a989b2764083a86b4872424c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LostSoul
+  isDeathRetrieval: 0
   soulValue: 10
+  animator: {fileID: 0}
+  appearDistance: 8
+  shatterAnimDuration: 0.5
 --- !u!58 &1534932598
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -36297,7 +36321,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0ad7b2a989b2764083a86b4872424c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LostSoul
+  isDeathRetrieval: 0
   soulValue: 10
+  animator: {fileID: 0}
+  appearDistance: 8
+  shatterAnimDuration: 0.5
 --- !u!58 &1782511620
 CircleCollider2D:
   m_ObjectHideFlags: 0
