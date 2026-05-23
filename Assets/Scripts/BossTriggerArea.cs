@@ -49,14 +49,19 @@ public class BossArenaTrigger : MonoBehaviour
     {
         if (collision.CompareTag("Player") && hasTriggered)
         {
-            hasTriggered = false;
-
-            if (bossHealthBarUI != null) bossHealthBarUI.SetActive(false);
-            if (bossMusic != null) bossMusic.Stop();
-
-            if (activeCameraRoutine != null) StopCoroutine(activeCameraRoutine);
-            activeCameraRoutine = StartCoroutine(ResetCameraZoom());
+            ResetArea();
         }
+    }
+
+    public void ResetArea()
+    {
+        hasTriggered = false;
+
+        if (bossHealthBarUI != null) bossHealthBarUI.SetActive(false);
+        if (bossMusic != null) bossMusic.Stop();
+
+        if (activeCameraRoutine != null) StopCoroutine(activeCameraRoutine);
+        activeCameraRoutine = StartCoroutine(ResetCameraZoom());
     }
 
     private IEnumerator ResetCameraZoom()

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class BossController : MonoBehaviour, IDamageable
 {
@@ -25,6 +26,9 @@ public class BossController : MonoBehaviour, IDamageable
 
     [Header("UI")]
     [SerializeField] private UnityEngine.UI.Slider healthBar;
+
+    [Header("Arena Event")]
+    [SerializeField] private BossArenaTrigger arenaTrigger;
 
     //private int currentHealth;
     private Rigidbody2D boss;
@@ -148,9 +152,23 @@ public class BossController : MonoBehaviour, IDamageable
 
     private void Die()
     {
+        StopAllCoroutines();
+        if (arenaTrigger != null)
+        {
+            arenaTrigger.ResetArea();
+        }
+        //if (spriteRenderer != null)
+        //{
+        //    spriteRenderer.color = Color.white;
+        //}
+        //if (healthBar != null)
+        //{
+        //    healthBar.gameObject.SetActive(false);
+        //}
         currentState = State.Dead;
         animator.SetBool("Dead", true);
         boss.linearVelocity = Vector2.zero;
+        GetComponent<Rigidbody2D>().gravityScale = 0f;
 
         GetComponent<Collider2D>().enabled = false;
     }
@@ -175,6 +193,14 @@ public class BossController : MonoBehaviour, IDamageable
         if (healthBar != null)
         {
             healthBar.value = currentHealth;
+        }
+    }
+
+    public void Vanish()
+    {
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.enabled = false;
         }
     }
 }
