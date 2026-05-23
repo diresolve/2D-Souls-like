@@ -298,11 +298,14 @@ public class PlayerController : MonoBehaviour
         // pokusaj fixanja
 
         bool isTouchingWallAhead = false;
-        float pushCheckDistance = 0.05f;
+        //float pushCheckDistance = 0.05f;
+        float pushCheckDistance = 0.02f;
+
         Vector2 checkDir = new Vector2(moveHorizontal > 0 ? 1 : -1, 0);
-        LayerMask solidObstacle = enemyLayer;
+        LayerMask solidObstacle = enemyLayer | wallLayer;
 
         Collider2D playerCollider = bodyCollider;
+        //Vector2 boxCastSize = new Vector2(playerCollider.bounds.size.x * 0.9f, playerCollider.bounds.size.y * 0.8f);
         Vector2 boxCastSize = new Vector2(playerCollider.bounds.size.x * 0.9f, playerCollider.bounds.size.y * 0.8f);
 
         RaycastHit2D hit = Physics2D.BoxCast(
@@ -328,14 +331,16 @@ public class PlayerController : MonoBehaviour
         }
  
         float targetSpeed = moveHorizontal * maxMoveSpeed;
+        float currentSpeed = rb2D.linearVelocity.x;
 
         // ovo se isto dodalo
         if (isTouchingWallAhead)
         {
             targetSpeed = 0f;
+            currentSpeed = 0f;
         }
 
-        float currentSpeed = rb2D.linearVelocity.x;
+        
 
  
         float accelRate = (Mathf.Abs(targetSpeed) > 0.01f) ? acceleration : deceleration;
