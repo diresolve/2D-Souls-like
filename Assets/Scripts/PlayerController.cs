@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -70,7 +71,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpToFallAnimationClipLength = 0.2f;
     [SerializeField] private float jumpToFallVelocityThreshold = 0.05f;
 
-    // stamina system
     [Header("Stamina")]
     [SerializeField] private UnityEngine.UI.Slider staminaBar;
     [SerializeField] private float maxStamina = 100f;
@@ -83,6 +83,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float lastStaminaUse;
 
     [Header("Currency")]
+    [SerializeField] TextMeshProUGUI coinCount;
     [SerializeField] private int currentSouls = 0;
     [SerializeField] private GameObject drop;
 
@@ -221,6 +222,7 @@ public class PlayerController : MonoBehaviour
         }
 
         RespawnSouls();
+        UpdateCoinText();
 
         //if (hasDroppedSouls && drop != null)
         //{
@@ -1061,6 +1063,7 @@ public class PlayerController : MonoBehaviour
     public void AddSouls(int amount)
     {
         currentSouls += amount;
+        UpdateCoinText();
     }
 
     private IEnumerator PerformInteraction()
@@ -1163,6 +1166,18 @@ public class PlayerController : MonoBehaviour
         return false;
     }
 
+    private void UpdateCoinText()
+    {
+        if (coinCount != null)
+        {
+            coinCount.text = currentSouls.ToString();
+        }
+        else
+        {
+            Debug.LogWarning("Coin Count UI is not assigned in the Inspector!");
+        }
+    }
+
     private void UpdateStaminaBar()
     {
         if (staminaBar != null)
@@ -1179,4 +1194,5 @@ public class PlayerController : MonoBehaviour
 
     public bool IsGrounded { get { return isGrounded; } }
     public float UpwardBounceForce { get { return upwardBounceForce; } }
+
 }

@@ -20,7 +20,7 @@ public class LostSoul : MonoBehaviour
     {
         if (isDeathRetrieval)
         {
-            PlayerController player = FindObjectOfType<PlayerController>();
+            PlayerController player = FindFirstObjectByType<PlayerController>();
             if (player != null)
             {
                 playerTransform = player.transform;
