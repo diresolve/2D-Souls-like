@@ -22,10 +22,21 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private Vector2 dashAttackBoxSize = new Vector2(3f, 1.5f);
     [SerializeField] private float dashAttackForwardOffset = 1.5f;
 
-    //[Header("Blocking")]
+    [Header("Blocking")]
+    [SerializeField] private float blockDuration = 0.5f;
+    [SerializeField] private float blockCooldown = 1f;
+    private float blockCooldownTimer = 0f;
+    private bool requiresBlockRelease = false;
     //[SerializeField] private float blockStaminaDrainRate = 10f;
     //[SerializeField] private float blockHitStaminaCost = 25f;
 
+    private void Update()
+    {
+        if (blockCooldownTimer > 0f)
+        {
+            blockCooldownTimer -= Time.deltaTime;
+        }
+    }
     public bool IsBlocking { get; private set; }
 
     public bool isAttacking {  get; private set; }
@@ -46,15 +57,30 @@ public class PlayerCombat : MonoBehaviour
     }
 
     public void SetBlocking(bool isHoldingBlock, bool hasStamina)
-    { 
-        if (isHoldingBlock && hasStamina && !isAttacking && !IsDashAttacking)
+    {
+        if (!isHoldingBlock)
         {
-            IsBlocking = true;
+            requiresBlockRelease = false;
+            return;
         }
-        else
+
+        if (requiresBlockRelease || IsBlocking || blockCooldownTimer > 0f || !hasStamina || isAttacking || IsDashAttacking)
         {
-            IsBlocking = false;
+            return;
         }
+
+        StartCoroutine(BlockRoutine());
+    }
+
+    private IEnumerator BlockRoutine()
+    {
+        IsBlocking = true;
+        requiresBlockRelease = true;
+
+        yield return new WaitForSeconds(blockDuration);
+
+        IsBlocking = false;
+        blockCooldownTimer = blockCooldown;
     }
 
     public bool TryBlockAttack(float attackDirectionX, bool isFacingRight)
