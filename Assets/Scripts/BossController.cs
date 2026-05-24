@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using Unity.VisualScripting;
+using Unity.Cinemachine;
 
 public class BossController : MonoBehaviour, IDamageable
 {
@@ -39,6 +40,14 @@ public class BossController : MonoBehaviour, IDamageable
     [SerializeField] private float rageMoveSpeedMultiplier = 1.25f;
     [SerializeField] private float rageDamageMultiplier = 1.25f;
     [SerializeField] private float rageHeavyCooldownMultiplier = 0.75f;
+
+    [Header("Screen Shake")]
+    [SerializeField] private CinemachineCamera screenShakeCamera;
+    [SerializeField] private CinemachineImpulseSource heavyAttackImpulseSource;
+    [SerializeField] private float heavyAttackShakeForce = 0.35f;
+    [SerializeField] private float heavyAttackShakeDuration = 0.2f;
+    [SerializeField, Range(0f, 1f)] private float heavyAttackShakeTiming = 0.65f;
+    [SerializeField] private bool autoSetupScreenShake = true;
 
     [Header("UI")]
     [SerializeField] private UnityEngine.UI.Slider healthBar;
@@ -90,6 +99,7 @@ public class BossController : MonoBehaviour, IDamageable
         }
 
         InitializeBossWeaponDamage();
+        InitializeScreenShake();
     }
 
     void Update()
@@ -268,7 +278,18 @@ public class BossController : MonoBehaviour, IDamageable
         animator.speed = attackAnimationSpeed;
         animator.SetTrigger("Attack");
 
-        yield return new WaitForSeconds(attackAnimationClipLength / attackAnimationSpeed);
+        float attackDuration = attackAnimationClipLength / attackAnimationSpeed;
+        if (isHeavyAttack)
+        {
+            float shakeDelay = attackDuration * heavyAttackShakeTiming;
+            yield return new WaitForSeconds(shakeDelay);
+            ShakeCameraForHeavyAttack();
+            yield return new WaitForSeconds(attackDuration - shakeDelay);
+        }
+        else
+        {
+            yield return new WaitForSeconds(attackDuration);
+        }
 
         FinishAttack(isHeavyAttack);
     }
@@ -328,6 +349,79 @@ public class BossController : MonoBehaviour, IDamageable
             float remainingCooldown = nextHeavyAttackTime - Time.time;
             nextHeavyAttackTime = Time.time + remainingCooldown * rageHeavyCooldownMultiplier;
         }
+    }
+
+    private void InitializeScreenShake()
+    {
+        if (!autoSetupScreenShake)
+        {
+            return;
+        }
+
+        if (heavyAttackImpulseSource == null)
+        {
+            heavyAttackImpulseSource = GetComponent<CinemachineImpulseSource>();
+        }
+
+        if (heavyAttackImpulseSource == null)
+        {
+            heavyAttackImpulseSource = gameObject.AddComponent<CinemachineImpulseSource>();
+        }
+
+        ConfigureHeavyAttackImpulseSource();
+
+        if (screenShakeCamera == null)
+        {
+            screenShakeCamera = FindFirstObjectByType<CinemachineCamera>();
+        }
+
+        if (screenShakeCamera == null)
+        {
+            return;
+        }
+
+        CinemachineImpulseListener impulseListener = screenShakeCamera.GetComponent<CinemachineImpulseListener>();
+        if (impulseListener == null)
+        {
+            impulseListener = screenShakeCamera.gameObject.AddComponent<CinemachineImpulseListener>();
+        }
+
+        impulseListener.ChannelMask = 1;
+        impulseListener.Gain = 1f;
+        impulseListener.Use2DDistance = true;
+        impulseListener.UseCameraSpace = true;
+    }
+
+    private void ConfigureHeavyAttackImpulseSource()
+    {
+        if (heavyAttackImpulseSource == null)
+        {
+            return;
+        }
+
+        if (heavyAttackImpulseSource.ImpulseDefinition == null)
+        {
+            heavyAttackImpulseSource.ImpulseDefinition = new CinemachineImpulseDefinition();
+        }
+
+        heavyAttackImpulseSource.ImpulseDefinition.ImpulseChannel = 1;
+        heavyAttackImpulseSource.ImpulseDefinition.ImpulseShape = CinemachineImpulseDefinition.ImpulseShapes.Bump;
+        heavyAttackImpulseSource.ImpulseDefinition.ImpulseDuration = Mathf.Max(0.01f, heavyAttackShakeDuration);
+        heavyAttackImpulseSource.ImpulseDefinition.ImpulseType = CinemachineImpulseDefinition.ImpulseTypes.Uniform;
+        heavyAttackImpulseSource.ImpulseDefinition.DissipationDistance = 100f;
+        heavyAttackImpulseSource.ImpulseDefinition.DissipationRate = 0.25f;
+        heavyAttackImpulseSource.DefaultVelocity = Vector3.down;
+    }
+
+    private void ShakeCameraForHeavyAttack()
+    {
+        if (heavyAttackImpulseSource == null)
+        {
+            return;
+        }
+
+        ConfigureHeavyAttackImpulseSource();
+        heavyAttackImpulseSource.GenerateImpulseWithForce(heavyAttackShakeForce);
     }
 
     private IEnumerator DamageFlash()

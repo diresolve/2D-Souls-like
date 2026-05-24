@@ -7,7 +7,7 @@
 - [x] Attack pattern
 - [x] Special attack
 - [x] Increase boss attack hitbox
-- [ ] Screen shake on boss attacks
+- [x] Screen shake on boss heavy attacks
 - [ ] Money drop on boss death
 
 ## Fixes
