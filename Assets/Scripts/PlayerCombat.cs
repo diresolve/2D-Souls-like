@@ -22,9 +22,9 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private Vector2 dashAttackBoxSize = new Vector2(3f, 1.5f);
     [SerializeField] private float dashAttackForwardOffset = 1.5f;
 
-    [Header("Blocking")]
-    [SerializeField] private float blockStaminaDrainRate = 10f;
-    [SerializeField] private float blockHitStaminaCost = 25f;
+    //[Header("Blocking")]
+    //[SerializeField] private float blockStaminaDrainRate = 10f;
+    //[SerializeField] private float blockHitStaminaCost = 25f;
 
     public bool IsBlocking { get; private set; }
 
