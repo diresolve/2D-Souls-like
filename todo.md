@@ -3,7 +3,7 @@
 ## Boss
 
 - [ ] Character can't leave the arena until the boss dies or the player dies
-- [ ] Boss gets faster movement and faster attacks at lower health
+- [x] Boss gets faster movement and faster attacks at lower health
 - [x] Attack pattern
 - [x] Special attack
 - [x] Increase boss attack hitbox

@@ -34,6 +34,12 @@ public class BossController : MonoBehaviour, IDamageable
     [SerializeField] private float maxHeavyAttackCooldown = 7f;
     [SerializeField] private float attackAnimationClipLength = 0.8f;
 
+    [Header("Rage Mode")]
+    [SerializeField, Range(0.01f, 1f)] private float rageHealthThreshold = 0.5f;
+    [SerializeField] private float rageMoveSpeedMultiplier = 1.25f;
+    [SerializeField] private float rageDamageMultiplier = 1.25f;
+    [SerializeField] private float rageHeavyCooldownMultiplier = 0.75f;
+
     [Header("UI")]
     [SerializeField] private UnityEngine.UI.Slider healthBar;
 
@@ -53,6 +59,7 @@ public class BossController : MonoBehaviour, IDamageable
     private float nextAttackTime = 0f;
     private float nextHeavyAttackTime = 0f;
     private bool isFacingRight = false;
+    private bool isEnraged = false;
 
     void Start()
     {
@@ -170,9 +177,10 @@ public class BossController : MonoBehaviour, IDamageable
 
     private void MoveTowardsPlayer()
     {
-        animator.SetFloat("Speed", moveSpeed);
+        float currentMoveSpeed = GetCurrentMoveSpeed();
+        animator.SetFloat("Speed", currentMoveSpeed);
         float direction = Mathf.Sign(player.position.x - transform.position.x);
-        boss.linearVelocity = new Vector2(direction * moveSpeed, boss.linearVelocity.y);
+        boss.linearVelocity = new Vector2(direction * currentMoveSpeed, boss.linearVelocity.y);
     }
 
     private void StopMoving()
@@ -197,7 +205,7 @@ public class BossController : MonoBehaviour, IDamageable
             bossWeaponDamage = bossWeapon.AddComponent<BossWeaponDamage>();
         }
 
-        bossWeaponDamage.SetDamage(normalAttackDamage);
+        bossWeaponDamage.SetDamage(GetCurrentNormalAttackDamage());
     }
 
     public void EnableWeapon()
@@ -250,9 +258,10 @@ public class BossController : MonoBehaviour, IDamageable
         StopMoving();
         LookAtPlayer();
 
+        int normalDamage = GetCurrentNormalAttackDamage();
         int attackDamage = isHeavyAttack
-            ? Mathf.RoundToInt(normalAttackDamage * heavyAttackDamageMultiplier)
-            : normalAttackDamage;
+            ? Mathf.RoundToInt(normalDamage * heavyAttackDamageMultiplier)
+            : normalDamage;
         float attackAnimationSpeed = isHeavyAttack ? Mathf.Max(heavyAttackAnimationSpeed, 0.01f) : 1f;
 
         SetBossWeaponDamage(attackDamage);
@@ -270,7 +279,7 @@ public class BossController : MonoBehaviour, IDamageable
         animator.speed = 1f;
         animator.ResetTrigger("Attack");
         animator.CrossFade("BossIdle", 0.05f);
-        SetBossWeaponDamage(normalAttackDamage);
+        SetBossWeaponDamage(GetCurrentNormalAttackDamage());
         nextAttackTime = Time.time + attackCooldown;
         if (wasHeavyAttack)
         {
@@ -283,7 +292,42 @@ public class BossController : MonoBehaviour, IDamageable
     {
         float minCooldown = Mathf.Min(minHeavyAttackCooldown, maxHeavyAttackCooldown);
         float maxCooldown = Mathf.Max(minHeavyAttackCooldown, maxHeavyAttackCooldown);
-        return Random.Range(minCooldown, maxCooldown);
+        float cooldownMultiplier = isEnraged ? rageHeavyCooldownMultiplier : 1f;
+        return Random.Range(minCooldown, maxCooldown) * cooldownMultiplier;
+    }
+
+    private float GetCurrentMoveSpeed()
+    {
+        return isEnraged ? moveSpeed * rageMoveSpeedMultiplier : moveSpeed;
+    }
+
+    private int GetCurrentNormalAttackDamage()
+    {
+        float damageMultiplier = isEnraged ? rageDamageMultiplier : 1f;
+        return Mathf.Max(0, Mathf.RoundToInt(normalAttackDamage * damageMultiplier));
+    }
+
+    private void TryEnterRageMode()
+    {
+        if (isEnraged || maxHealth <= 0)
+        {
+            return;
+        }
+
+        float healthPercent = (float)currentHealth / maxHealth;
+        if (healthPercent > rageHealthThreshold)
+        {
+            return;
+        }
+
+        isEnraged = true;
+        SetBossWeaponDamage(GetCurrentNormalAttackDamage());
+
+        if (nextHeavyAttackTime > Time.time)
+        {
+            float remainingCooldown = nextHeavyAttackTime - Time.time;
+            nextHeavyAttackTime = Time.time + remainingCooldown * rageHeavyCooldownMultiplier;
+        }
     }
 
     private IEnumerator DamageFlash()
@@ -345,6 +389,7 @@ public class BossController : MonoBehaviour, IDamageable
 
         currentHealth = Mathf.Max(currentHealth - amount, 0);
         UpdateHealthBar();
+        TryEnterRageMode();
 
         StartCoroutine(DamageFlash());
 
