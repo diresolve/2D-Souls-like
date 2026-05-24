@@ -32,7 +32,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1061432620311887122}
   - {fileID: 1595576269978705157}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -97,7 +96,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.27385807, y: -0.23470283}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -107,7 +106,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.4375, y: 2}
+  m_Size: {x: 0.88978386, y: 1.5305943}
   m_EdgeRadius: 0
 --- !u!114 &3942276111307278959
 MonoBehaviour:
@@ -135,6 +134,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 494767029776325668}
   skeletonWeapon: {fileID: 8256913385278299798}
   visuals: {fileID: 1595576269978705157}
+  leashRange: 6
 --- !u!1 &5914514991548790897
 GameObject:
   m_ObjectHideFlags: 0
@@ -166,7 +166,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1061432620311887122}
   m_Father: {fileID: 8107591147299652779}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &494767029776325668
@@ -287,12 +288,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8256913385278299798}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8107591147299652779}
+  m_Father: {fileID: 1595576269978705157}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!61 &8030792919697699338
 BoxCollider2D:

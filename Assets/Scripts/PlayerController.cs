@@ -40,7 +40,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float terminalVelocity = -12f;
     [SerializeField] private float swampSpeedMultiplier = 0.4f;
     [SerializeField] private float swampJumpMultiplier = 0.5f;
-    [SerializeField] private float healTime = 1.5f;
+    [SerializeField] private float healTime = 0.5f;
     [SerializeField] private Vector2 damageKnockback = new Vector2(5f, 5f);
     [SerializeField] private float alteredGravityScale = 0.5f;
 
@@ -52,6 +52,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private int maxHealth = 100;
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private float flashInterval = 0.1f;
+
+    [Header("Heal Visuals")]
+    [SerializeField] private GameObject healObject;
+    [SerializeField] private Animator healAnimator;
 
     [Header("Animation")]
     [SerializeField] private Animator animator;
@@ -832,9 +836,22 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator UseHealingFlask()
     {
+        if (!canMove) yield break;
         canMove = false;
         rb2D.linearVelocity = new Vector2(0f, rb2D.linearVelocity.y);
+        if (healObject != null)
+        {
+            healObject.SetActive(true);
+        }
+        //if (healAnimator != null)
+        //{
+        //    healAnimator.SetTrigger("Heal");
+        //}
         yield return new WaitForSeconds(healTime);
+        if (healObject != null)
+        {
+            healObject.SetActive(false);
+        }
         canMove = true;
     }
 
