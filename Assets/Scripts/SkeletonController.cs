@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class SkeletonController : MonoBehaviour, IDamageable
 {
-    public enum State { Idle, Chase, Attacking, Dead }
+    public enum State { Idle, Chase, Attacking, Returning, Dead }
 
     [Header("State")]
     public State currentState = State.Idle;
@@ -27,6 +27,10 @@ public class SkeletonController : MonoBehaviour, IDamageable
     [SerializeField] private GameObject skeletonWeapon;
     [SerializeField] private Transform visuals;
 
+    [Header("Leash")]
+    [SerializeField] private float leashRange = 6f;
+    private Vector2 homePosition;
+
     private int currentHealth;
     private float nextAttackTime = 0f;
     private bool isFacingRight = true;
@@ -38,6 +42,7 @@ public class SkeletonController : MonoBehaviour, IDamageable
 
     void Start()
     {
+        homePosition = transform.position;
         currentHealth = maxHealth;
         rb = GetComponent<Rigidbody2D>();
 
@@ -60,6 +65,14 @@ public class SkeletonController : MonoBehaviour, IDamageable
 
     void Update()
     {
+        if (currentState != State.Dead && currentState != State.Attacking)
+        {
+            float distFromHome = Vector2.Distance(transform.position, homePosition);
+
+            if (distFromHome > leashRange && currentState != State.Returning)
+                currentState = State.Returning;
+        }
+
         if (currentState == State.Dead || player == null)
             return;
 
@@ -78,10 +91,17 @@ public class SkeletonController : MonoBehaviour, IDamageable
             case State.Chase:
                 LookAtPlayer();
 
+                float distToHome = Vector2.Distance(transform.position, homePosition);
+
+                if (distToHome > leashRange + 1f)
+                {
+                    currentState = State.Returning;
+                    break;
+                }
+
                 if (distanceToPlayer <= attackRange)
                 {
                     StopMoving();
-
                     if (Time.time >= nextAttackTime)
                         attackRoutine = StartCoroutine(AttackRoutine());
                 }
@@ -96,24 +116,43 @@ public class SkeletonController : MonoBehaviour, IDamageable
 
                 break;
 
+            case State.Returning:
+                LookAtPoint(homePosition);
+                MoveTowardsPoint(homePosition);
+
+                float distFromHome = Vector2.Distance(transform.position, homePosition);
+
+                if (distFromHome < 0.5f)
+                {
+                    transform.position = new Vector3(homePosition.x, transform.position.y, transform.position.z);
+                    StopMoving();
+                    currentState = State.Idle;
+                }
+
+                break;
+
             case State.Attacking:
                 break;
         }
     }
 
+    private void MoveTowardsPoint(Vector2 target)
+    {
+        animator.SetFloat("Speed", moveSpeed);
+        float direction = Mathf.Sign(target.x - transform.position.x);
+        rb.linearVelocity = new Vector2(direction * moveSpeed, rb.linearVelocity.y);
+    }
+
     private void MoveTowardsPlayer()
     {
         animator.SetFloat("Speed", moveSpeed);
-
         float direction = Mathf.Sign(player.position.x - transform.position.x);
-
         rb.linearVelocity = new Vector2(direction * moveSpeed, rb.linearVelocity.y);
     }
 
     private void StopMoving()
     {
         animator.SetFloat("Speed", 0f);
-
         rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
     }
 
@@ -125,10 +164,17 @@ public class SkeletonController : MonoBehaviour, IDamageable
             Flip();
     }
 
+    private void LookAtPoint(Vector2 target)
+    {
+        if (target.x > transform.position.x && !isFacingRight)
+            Flip();
+        else if (target.x < transform.position.x && isFacingRight)
+            Flip();
+    }
+
     private void Flip()
     {
         isFacingRight = !isFacingRight;
-
         Vector3 scale = visuals.localScale;
         scale.x *= -1;
         visuals.localScale = scale;
@@ -146,7 +192,6 @@ public class SkeletonController : MonoBehaviour, IDamageable
         yield return new WaitForSeconds(0.4f);
 
         nextAttackTime = Time.time + attackCooldown;
-
         currentState = State.Chase;
     }
 
@@ -170,9 +215,7 @@ public class SkeletonController : MonoBehaviour, IDamageable
         StartCoroutine(DamageFlash());
 
         if (currentHealth <= 0)
-        {
             Die();
-        }
         else
         {
             ApplyCleanKnockback(attackDirection);
@@ -183,18 +226,14 @@ public class SkeletonController : MonoBehaviour, IDamageable
     private void ApplyCleanKnockback(Vector2 attackDirection)
     {
         rb.linearVelocity = Vector2.zero;
-
         Vector2 knockbackDir = new Vector2(Mathf.Sign(attackDirection.x), 0f).normalized;
-
         float appliedForce = knockbackForce / knockbackResistance;
-
         rb.AddForce(knockbackDir * appliedForce, ForceMode2D.Impulse);
     }
 
     private IEnumerator DamageFlash()
     {
         yield return new WaitForSeconds(flashDuration);
-
         spriteRenderer.color = originalColor;
     }
 
