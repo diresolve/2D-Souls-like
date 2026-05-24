@@ -3126,7 +3126,7 @@ Transform:
   m_GameObject: {fileID: 397775667}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.014, y: -0.007, z: 0}
   m_LocalScale: {x: 3, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8031,6 +8031,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossArenaTrigger
   bossHealthBarUI: {fileID: 535289250}
   bossMusic: {fileID: 638731924}
+  bossController: {fileID: 0}
   virtualCamera: {fileID: 612258851}
   bossFocusTarget: {fileID: 1378997897}
   zoomedOutSize: 8
@@ -35651,7 +35652,9 @@ MonoBehaviour:
   maxHealth: 200
   moveSpeed: 6
   attackRange: 2
+  attackStartColliderGap: 0.15
   attackCooldown: 2
+  chaseRange: 10
   player: {fileID: 1866114886}
   animator: {fileID: 1378997895}
   spriteRenderer: {fileID: 1378997896}
@@ -35660,7 +35663,9 @@ MonoBehaviour:
   normalAttackDamage: 25
   heavyAttackDamageMultiplier: 1.5
   heavyAttackAnimationSpeed: 0.5
-  heavyAttackCooldown: 6
+  minHeavyAttackCooldown: 5
+  maxHeavyAttackCooldown: 7
+  attackAnimationClipLength: 0.8
   healthBar: {fileID: 535289252}
   arenaTrigger: {fileID: 638731923}
   deathFloatHeight: 1.5
@@ -36712,7 +36717,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.69, y: 0.44}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
@@ -36919,9 +36924,9 @@ BoxCollider2D:
   m_Offset: {x: -0.034894943, y: 0.032723784}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
+    pivot: {x: 0.4, y: 0.37}
+    oldSize: {x: 0.69, y: 0.44}
+    newSize: {x: 0.69, y: 0.44}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
