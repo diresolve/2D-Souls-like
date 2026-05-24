@@ -4,7 +4,7 @@
 
 - [ ] Character can't leave the arena until the boss dies or the player dies
 - [ ] Boss gets faster movement and faster attacks at lower health
-- [ ] Attack pattern
+- [x] Attack pattern
 - [x] Special attack
 - [x] Increase boss attack hitbox
 - [ ] Screen shake on boss attacks
@@ -19,7 +19,7 @@
 ## Add Later
 
 - [x] Checkpoint animation
-- [ ] Coin count on screen
+- [x] Coin count on screen
 - [ ] Save point
 - [ ] Level up system
 - [ ] Basic enemies

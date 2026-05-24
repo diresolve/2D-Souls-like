@@ -30,7 +30,8 @@ public class BossController : MonoBehaviour, IDamageable
     [SerializeField] private int normalAttackDamage = 25;
     [SerializeField] private float heavyAttackDamageMultiplier = 1.5f;
     [SerializeField] private float heavyAttackAnimationSpeed = 0.5f;
-    [SerializeField] private float heavyAttackCooldown = 6f;
+    [SerializeField] private float minHeavyAttackCooldown = 5f;
+    [SerializeField] private float maxHeavyAttackCooldown = 7f;
     [SerializeField] private float attackAnimationClipLength = 0.8f;
 
     [Header("UI")]
@@ -273,9 +274,16 @@ public class BossController : MonoBehaviour, IDamageable
         nextAttackTime = Time.time + attackCooldown;
         if (wasHeavyAttack)
         {
-            nextHeavyAttackTime = Time.time + heavyAttackCooldown;
+            nextHeavyAttackTime = Time.time + GetNextHeavyAttackCooldown();
         }
         currentState = State.Chase; 
+    }
+
+    private float GetNextHeavyAttackCooldown()
+    {
+        float minCooldown = Mathf.Min(minHeavyAttackCooldown, maxHeavyAttackCooldown);
+        float maxCooldown = Mathf.Max(minHeavyAttackCooldown, maxHeavyAttackCooldown);
+        return Random.Range(minCooldown, maxCooldown);
     }
 
     private IEnumerator DamageFlash()
