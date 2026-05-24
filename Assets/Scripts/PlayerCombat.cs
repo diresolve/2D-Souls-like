@@ -22,6 +22,12 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private Vector2 dashAttackBoxSize = new Vector2(3f, 1.5f);
     [SerializeField] private float dashAttackForwardOffset = 1.5f;
 
+    [Header("Blocking")]
+    [SerializeField] private float blockStaminaDrainRate = 10f;
+    [SerializeField] private float blockHitStaminaCost = 25f;
+
+    public bool IsBlocking { get; private set; }
+
     public bool isAttacking {  get; private set; }
     public bool IsDashAttacking { get; private set; }
     public float AttackDuration { get { return attackStartupTime + attackRecoveryTime; } }
@@ -37,6 +43,28 @@ public class PlayerCombat : MonoBehaviour
     private void Awake()
     {
         player = GetComponent<PlayerController>();
+    }
+
+    public void SetBlocking(bool isHoldingBlock, bool hasStamina)
+    { 
+        if (isHoldingBlock && hasStamina && !isAttacking && !IsDashAttacking)
+        {
+            IsBlocking = true;
+        }
+        else
+        {
+            IsBlocking = false;
+        }
+    }
+
+    public bool TryBlockAttack(float attackDirectionX, bool isFacingRight)
+    {
+        if (!IsBlocking) return false;
+
+        float facingDirectionX = isFacingRight ? 1f : -1f;
+        bool isAttackFromFront = (Mathf.Sign(attackDirectionX) == facingDirectionX);
+
+        return isAttackFromFront;
     }
 
     public void QueueAttack()

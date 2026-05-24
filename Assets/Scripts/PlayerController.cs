@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private string attackActionName = "Attack";
     [SerializeField] private string interactActionName = "Interact";
     [SerializeField] private string healActionName = "Heal";
+    [SerializeField] private string blockActionName = "Block";
 
     [Header("Movement")]
     [SerializeField] private float maxMoveSpeed = 8f;
@@ -70,6 +71,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float dashAttackAnimationClipLength = 1f;
     [SerializeField] private float jumpToFallAnimationClipLength = 0.2f;
     [SerializeField] private float jumpToFallVelocityThreshold = 0.05f;
+    [SerializeField] private string blockAnimationState = "Block";
 
     [Header("Stamina")]
     [SerializeField] private UnityEngine.UI.Slider staminaBar;
@@ -112,7 +114,6 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded;
     private bool jumpRequested;
 
-    // for double jump
     private int maxJumps = 2;
     private int jumpsRemaining = 2;
 
@@ -130,10 +131,6 @@ public class PlayerController : MonoBehaviour
 
     private bool isDead = false;
 
-    //public static Vector3 lastDeathPosition;
-    //public static int droppedSoulsAmount = 0;
-    //public static bool hasDroppedSouls = false;
-
     [SerializeField] GameObject _gameOverScreen;
 
     private PlayerCombat combatScript;
@@ -145,6 +142,7 @@ public class PlayerController : MonoBehaviour
     private InputAction attackAction;
     private InputAction interactAction;
     private InputAction healAction;
+    private InputAction blockAction;
     private Vector2 moveInput;
     private string currentAnimationState;
     private int lastAnimatedAttackSequence;
@@ -223,17 +221,6 @@ public class PlayerController : MonoBehaviour
 
         RespawnSouls();
         UpdateCoinText();
-
-        //if (hasDroppedSouls && drop != null)
-        //{
-        //    GameObject droppedSouls = Instantiate(drop, lastDeathPosition, Quaternion.identity);
-
-        //    LostSoul soulScript = droppedSouls.GetComponent<LostSoul>();
-        //    if (soulScript != null)
-        //    {
-        //        soulScript.SetSoulValue(droppedSoulsAmount);
-        //    }
-        //}
     }
 
     private void Update()
@@ -242,6 +229,18 @@ public class PlayerController : MonoBehaviour
         {
             UpdateAnimationState();
             return;
+        }
+
+        bool isHoldingBlock = blockAction != null && blockAction.ReadValue<float>() > 0.1f;
+        combatScript.SetBlocking(isHoldingBlock, currentStamina > 0f);
+
+        if (combatScript.IsBlocking && canMove && isGrounded && !isDashing)
+        {
+            currentStamina -= 10f * Time.deltaTime;
+            lastStaminaUse = Time.time;
+            UpdateStaminaBar();
+
+            moveHorizontal *= 0.5f;
         }
 
         HandleStaminaRegen();
@@ -581,6 +580,12 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        if (combatScript != null && combatScript.IsBlocking)
+        {
+            PlayAnimationState(blockAnimationState);
+            return;
+        }
+
         if (isWallSliding)
         {
             hasPlayedJumpToFallThisAirborne = true;
@@ -682,6 +687,12 @@ public class PlayerController : MonoBehaviour
         attackAction = FindInputAction(playerActionMap, attackActionName, CreateAttackAction);
         interactAction = FindInputAction(playerActionMap, interactActionName, CreateInteractAction);
         healAction = FindInputAction(playerActionMap, healActionName, CreateHealAction);
+        blockAction = FindInputAction(playerActionMap, blockActionName, CreateBlockAction);
+    }
+
+    private InputAction CreateBlockAction()
+    {
+        return CreateButtonAction(blockActionName, "<Mouse>/rightButton", "<Keyboard>/leftAlt", "<Gamepad>/rightShoulder");
     }
 
     private InputAction FindInputAction(InputActionMap actionMap, string actionName, Func<InputAction> fallbackFactory)
@@ -772,6 +783,7 @@ public class PlayerController : MonoBehaviour
         EnableInputAction(attackAction);
         EnableInputAction(interactAction);
         EnableInputAction(healAction);
+        EnableInputAction(blockAction);
     }
 
     private void EnableInputAction(InputAction action)
@@ -921,6 +933,42 @@ public class PlayerController : MonoBehaviour
                 isDashing = false;
                 rb2D.gravityScale = originalGravityScale;
             }
+
+            Transform attackerTransform = collision.transform.parent != null ? collision.transform.parent : collision.transform;
+            float attackDirectionX = attackerTransform.position.x - transform.position.x;
+
+            if (combatScript.TryBlockAttack(attackDirectionX, isFacingRight))
+            {
+                if (canConsumeStamina(25f))
+                {
+
+                    float facingDirectionX = isFacingRight ? 1f : -1f;
+
+                    bool isBossAttack = collision.GetComponent<BossWeaponDamage>() != null;
+
+                    if (isBossAttack)
+                    {
+                        rb2D.linearVelocity = Vector2.zero;
+                        rb2D.AddForce(new Vector2(damageKnockback.x * -facingDirectionX * 0.5f, 0f), ForceMode2D.Impulse);
+                    }
+                    else
+                    {
+                        Rigidbody2D enemyRb = collision.GetComponentInParent<Rigidbody2D>();
+                        if (enemyRb != null)
+                        {
+                            enemyRb.linearVelocity = Vector2.zero;
+                            enemyRb.AddForce(new Vector2(damageKnockback.x * facingDirectionX * 0.75f, 0f), ForceMode2D.Impulse);
+                        }
+                    }
+
+                    return;
+                }
+                else
+                {
+                    combatScript.SetBlocking(false, false);
+                }
+            }
+
             canMove = false;
             isInvulnerable = true;
             int enemySwordDamage = 25;

@@ -36651,6 +36651,7 @@ GameObject:
   - component: {fileID: 1866114890}
   - component: {fileID: 1866114889}
   - component: {fileID: 1866114891}
+  - component: {fileID: 1866114892}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -36707,15 +36708,15 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: -6872472756142014506, guid: a8e311cd6ea9508459aa5a6dc9a9ca32, type: 3}
   m_Color: {r: 0.81886786, g: 0.20857947, b: 0.35597628, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 4, y: 4}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
 --- !u!4 &1866114886
 Transform:
@@ -36819,6 +36820,7 @@ MonoBehaviour:
   attackActionName: Attack
   interactActionName: Interact
   healActionName: Heal
+  blockActionName: Block
   maxMoveSpeed: 8
   jumpForce: 30
   acceleration: 50
@@ -36860,6 +36862,7 @@ MonoBehaviour:
   dashAttackAnimationClipLength: 1
   jumpToFallAnimationClipLength: 0.2
   jumpToFallVelocityThreshold: 0.05
+  blockAnimationState: Block
   staminaBar: {fileID: 1366284737}
   maxStamina: 100
   staminaRegenRate: 35
@@ -36919,9 +36922,9 @@ BoxCollider2D:
   m_Offset: {x: -0.034894943, y: 0.032723784}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 4, y: 4}
+    newSize: {x: 4, y: 4}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -36957,6 +36960,30 @@ MonoBehaviour:
   dashAttackDamage: 15
   dashAttackBoxSize: {x: 3, y: 1.5}
   dashAttackForwardOffset: 1.5
+  blockStaminaDrainRate: 10
+  blockHitStaminaCost: 25
+--- !u!95 &1866114892
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1866114884}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 9599e54ce299cff49b089a4dd95e136e, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!4 &1866801818 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4552379490772930529, guid: 6d2b33871b1876744835c6b2d1265108, type: 3}
