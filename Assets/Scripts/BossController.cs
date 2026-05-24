@@ -11,9 +11,11 @@ public class BossController : MonoBehaviour, IDamageable
 
     [Header("Stats")]
     [SerializeField] private int maxHealth = 200;
-    [SerializeField] private float moveSpeed = 8f;
+    [SerializeField] private float moveSpeed = 6f;
     [SerializeField] private float attackRange = 2.5f;
+    [SerializeField] private float attackStartColliderGap = 0.15f;
     [SerializeField] private float attackCooldown = 2f;
+    [SerializeField] private float chaseRange = 10f;
 
     [Header("References")]
     [SerializeField] private Transform player;
@@ -29,6 +31,7 @@ public class BossController : MonoBehaviour, IDamageable
     [SerializeField] private float heavyAttackDamageMultiplier = 1.5f;
     [SerializeField] private float heavyAttackAnimationSpeed = 0.5f;
     [SerializeField] private float heavyAttackCooldown = 6f;
+    [SerializeField] private float attackAnimationClipLength = 0.8f;
 
     [Header("UI")]
     [SerializeField] private UnityEngine.UI.Slider healthBar;
@@ -42,7 +45,10 @@ public class BossController : MonoBehaviour, IDamageable
 
     //private int currentHealth;
     private Rigidbody2D boss;
+    private Collider2D bodyCollider;
+    private Collider2D playerCollider;
     private BossWeaponDamage bossWeaponDamage;
+    private Coroutine attackRoutine;
     private float nextAttackTime = 0f;
     private float nextHeavyAttackTime = 0f;
     private bool isFacingRight = false;
@@ -51,10 +57,16 @@ public class BossController : MonoBehaviour, IDamageable
     {
         currentHealth = maxHealth;
         boss = GetComponent<Rigidbody2D>();
+        bodyCollider = GetComponent<Collider2D>();
 
         if (player == null)
         {
             player = GameObject.FindGameObjectWithTag("Player").transform;
+        }
+
+        if (player != null)
+        {
+            playerCollider = player.GetComponent<Collider2D>();
         }
 
         if (healthBar != null)
@@ -79,44 +91,95 @@ public class BossController : MonoBehaviour, IDamageable
             return;
         }
 
+       if (player == null)
+        {
+            StopMoving();
+            return;
+        }
+
        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+       float horizontalGapToPlayer = GetHorizontalGapToPlayer();
+       float attackStartGap = Mathf.Max(0f, attackStartColliderGap);
 
         switch (currentState)
         {
             case State.Idle:
-                animator.SetFloat("Speed", 0f);
-                if (distanceToPlayer < 10f) 
+                StopMoving();
+                if (IsArenaActive() || distanceToPlayer < chaseRange) 
                 {
-                    currentState = State.Chase;
+                    ActivateBoss();
                 }
                 break;
 
             case State.Chase:
                 LookAtPlayer();
-                animator.SetFloat("Speed", moveSpeed);
 
-                if (distanceToPlayer <= attackRange)
+                if (horizontalGapToPlayer > attackStartGap)
                 {
-                    if (Time.time >= nextAttackTime)
-                    {
-                        bool useHeavyAttack = Time.time >= nextHeavyAttackTime;
-                        StartCoroutine(AttackRoutine(useHeavyAttack));
-                    }
-                    else
-                    {
-                        animator.SetFloat("Speed", 0f);
-                    }
+                    MoveTowardsPlayer();
                 }
                 else
                 {
-                    Vector2 target = new Vector2(player.position.x, boss.position.y);
-                    Vector2 newPos = Vector2.MoveTowards(boss.position, target, moveSpeed * Time.deltaTime);
-                    boss.MovePosition(newPos);
+                    StopMoving();
+                    if (Time.time >= nextAttackTime)
+                    {
+                        bool useHeavyAttack = Time.time >= nextHeavyAttackTime;
+                        attackRoutine = StartCoroutine(AttackRoutine(useHeavyAttack));
+                    }
                 }
                 break;
 
             case State.Attacking:
                 break;
+        }
+    }
+
+    public void ActivateBoss()
+    {
+        animator.speed = 1f;
+        if (currentState == State.Idle)
+        {
+            currentState = State.Chase;
+        }
+    }
+
+    private bool IsArenaActive()
+    {
+        return arenaTrigger != null && arenaTrigger.HasTriggered;
+    }
+
+    private float GetHorizontalGapToPlayer()
+    {
+        if (bodyCollider != null && playerCollider != null)
+        {
+            Bounds bossBounds = bodyCollider.bounds;
+            Bounds playerBounds = playerCollider.bounds;
+
+            if (playerBounds.center.x >= bossBounds.center.x)
+            {
+                return Mathf.Max(0f, playerBounds.min.x - bossBounds.max.x);
+            }
+
+            return Mathf.Max(0f, bossBounds.min.x - playerBounds.max.x);
+        }
+
+        float fallbackCenterDistance = Mathf.Abs(player.position.x - transform.position.x);
+        return Mathf.Max(0f, fallbackCenterDistance - attackRange);
+    }
+
+    private void MoveTowardsPlayer()
+    {
+        animator.SetFloat("Speed", moveSpeed);
+        float direction = Mathf.Sign(player.position.x - transform.position.x);
+        boss.linearVelocity = new Vector2(direction * moveSpeed, boss.linearVelocity.y);
+    }
+
+    private void StopMoving()
+    {
+        animator.SetFloat("Speed", 0f);
+        if (boss != null)
+        {
+            boss.linearVelocity = new Vector2(0f, boss.linearVelocity.y);
         }
     }
 
@@ -183,7 +246,8 @@ public class BossController : MonoBehaviour, IDamageable
     private IEnumerator AttackRoutine(bool isHeavyAttack)
     {
         currentState = State.Attacking;
-        animator.SetFloat("Speed", 0f);
+        StopMoving();
+        LookAtPlayer();
 
         int attackDamage = isHeavyAttack
             ? Mathf.RoundToInt(normalAttackDamage * heavyAttackDamageMultiplier)
@@ -194,16 +258,24 @@ public class BossController : MonoBehaviour, IDamageable
         animator.speed = attackAnimationSpeed;
         animator.SetTrigger("Attack");
 
-        yield return new WaitForSeconds(1.5f / attackAnimationSpeed);
+        yield return new WaitForSeconds(attackAnimationClipLength / attackAnimationSpeed);
 
+        FinishAttack(isHeavyAttack);
+    }
+
+    private void FinishAttack(bool wasHeavyAttack)
+    {
+        attackRoutine = null;
         animator.speed = 1f;
+        animator.ResetTrigger("Attack");
+        animator.CrossFade("BossIdle", 0.05f);
         SetBossWeaponDamage(normalAttackDamage);
         nextAttackTime = Time.time + attackCooldown;
-        if (isHeavyAttack)
+        if (wasHeavyAttack)
         {
             nextHeavyAttackTime = Time.time + heavyAttackCooldown;
         }
-        currentState = State.Idle; 
+        currentState = State.Chase; 
     }
 
     private IEnumerator DamageFlash()
@@ -216,6 +288,7 @@ public class BossController : MonoBehaviour, IDamageable
     private void Die()
     {
         StopAllCoroutines();
+        attackRoutine = null;
         if (arenaTrigger != null)
         {
             arenaTrigger.ResetArea();

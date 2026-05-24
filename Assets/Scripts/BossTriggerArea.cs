@@ -7,6 +7,7 @@ public class BossArenaTrigger : MonoBehaviour
     [Header("The Reveal")]
     [SerializeField] private GameObject bossHealthBarUI;
     [SerializeField] private AudioSource bossMusic;
+    [SerializeField] private BossController bossController;
 
     [Header("Cinemachine Setup")]
     [SerializeField] private CinemachineCamera virtualCamera;
@@ -19,13 +20,28 @@ public class BossArenaTrigger : MonoBehaviour
 
     private bool hasTriggered = false;
     private float originalZoomSize;
+    private bool hasOriginalZoomSize = false;
     private Coroutine activeCameraRoutine;
+    private MonoBehaviour activeCameraRoutineRunner;
+
+    public bool HasTriggered { get { return hasTriggered; } }
+
+    private void Awake()
+    {
+        CacheOriginalZoomSize();
+    }
 
     private void Start()
+    {
+        CacheOriginalZoomSize();
+    }
+
+    private void CacheOriginalZoomSize()
     {
         if (virtualCamera != null)
         {
             originalZoomSize = virtualCamera.Lens.OrthographicSize;
+            hasOriginalZoomSize = true;
         }
     }
 
@@ -40,8 +56,8 @@ public class BossArenaTrigger : MonoBehaviour
             if (bossHealthBarUI != null) bossHealthBarUI.SetActive(true);
             if (bossMusic != null) bossMusic.Play();
 
-            if (activeCameraRoutine != null) StopCoroutine(activeCameraRoutine);
-            activeCameraRoutine = StartCoroutine(CinematicReveal(player));
+            ActivateBoss();
+            StartCameraRoutine(CinematicReveal(player));
         }
     }
 
@@ -60,13 +76,72 @@ public class BossArenaTrigger : MonoBehaviour
         if (bossHealthBarUI != null) bossHealthBarUI.SetActive(false);
         if (bossMusic != null) bossMusic.Stop();
 
-        if (activeCameraRoutine != null) StopCoroutine(activeCameraRoutine);
-        activeCameraRoutine = StartCoroutine(ResetCameraZoom());
+        StartCameraRoutine(ResetCameraZoom());
+    }
+
+    private void StartCameraRoutine(IEnumerator routine)
+    {
+        StopActiveCameraRoutine();
+
+        MonoBehaviour coroutineRunner = GetCameraCoroutineRunner();
+        if (coroutineRunner == null)
+        {
+            ResetCameraZoomInstantly();
+            return;
+        }
+
+        activeCameraRoutineRunner = coroutineRunner;
+        activeCameraRoutine = coroutineRunner.StartCoroutine(routine);
+    }
+
+    private void StopActiveCameraRoutine()
+    {
+        if (activeCameraRoutine != null)
+        {
+            if (activeCameraRoutineRunner != null)
+            {
+                activeCameraRoutineRunner.StopCoroutine(activeCameraRoutine);
+            }
+
+            activeCameraRoutine = null;
+            activeCameraRoutineRunner = null;
+        }
+    }
+
+    private MonoBehaviour GetCameraCoroutineRunner()
+    {
+        return BossArenaCoroutineRunner.Instance;
+    }
+
+    private void ActivateBoss()
+    {
+        BossController bossToActivate = bossController;
+        if (bossToActivate == null && bossFocusTarget != null)
+        {
+            bossToActivate = bossFocusTarget.GetComponent<BossController>();
+        }
+
+        if (bossToActivate != null)
+        {
+            bossToActivate.ActivateBoss();
+        }
+    }
+
+    private void ResetCameraZoomInstantly()
+    {
+        if (virtualCamera == null || !hasOriginalZoomSize)
+        {
+            return;
+        }
+
+        LensSettings currentLens = virtualCamera.Lens;
+        currentLens.OrthographicSize = originalZoomSize;
+        virtualCamera.Lens = currentLens;
     }
 
     private IEnumerator ResetCameraZoom()
     {
-        if (virtualCamera != null)
+        if (virtualCamera != null && hasOriginalZoomSize)
         {
             LensSettings currentLens = virtualCamera.Lens;
 
@@ -123,5 +198,39 @@ public class BossArenaTrigger : MonoBehaviour
         {
             player.LockMovementForAttack(false);
         }
+
+        ActivateBoss();
+    }
+}
+
+class BossArenaCoroutineRunner : MonoBehaviour
+{
+    private static BossArenaCoroutineRunner instance;
+
+    public static BossArenaCoroutineRunner Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                GameObject runnerObject = new GameObject("BossArenaCoroutineRunner");
+                DontDestroyOnLoad(runnerObject);
+                instance = runnerObject.AddComponent<BossArenaCoroutineRunner>();
+            }
+
+            return instance;
+        }
+    }
+
+    private void Awake()
+    {
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 }

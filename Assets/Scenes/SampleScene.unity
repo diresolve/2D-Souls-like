@@ -35649,7 +35649,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossController
   currentState: 0
   maxHealth: 200
-  moveSpeed: 10
+  moveSpeed: 6
   attackRange: 2
   attackCooldown: 2
   player: {fileID: 1866114886}
