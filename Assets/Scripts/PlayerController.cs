@@ -1104,7 +1104,9 @@ public class PlayerController : MonoBehaviour
     {
         _gameOverScreen.SetActive(true);
         rb2D.simulated = false;
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSecondsRealtime(2f);
+
+        Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 

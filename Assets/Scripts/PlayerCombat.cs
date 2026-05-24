@@ -77,7 +77,18 @@ public class PlayerCombat : MonoBehaviour
         IsBlocking = true;
         requiresBlockRelease = true;
 
+        PlayerController playerController = GetPlayerController();
+        if (playerController != null && playerController.IsGrounded)
+        {
+            playerController.LockMovementForAttack(true);
+        }
+
         yield return new WaitForSeconds(blockDuration);
+
+        if (playerController != null)
+        {
+            playerController.LockMovementForAttack(false);
+        }
 
         IsBlocking = false;
         blockCooldownTimer = blockCooldown;
