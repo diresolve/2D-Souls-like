@@ -70,11 +70,16 @@ public class BossController : MonoBehaviour, IDamageable
     private bool isFacingRight = false;
     private bool isEnraged = false;
 
+    private void Awake()
+    {
+        boss = GetComponent<Rigidbody2D>();
+        bodyCollider = GetComponent<Collider2D>();
+    }
+
     void Start()
     {
         currentHealth = maxHealth;
-        boss = GetComponent<Rigidbody2D>();
-        bodyCollider = GetComponent<Collider2D>();
+        ResetCombatState();
 
         if (player == null)
         {
@@ -139,7 +144,7 @@ public class BossController : MonoBehaviour, IDamageable
                 else
                 {
                     StopMoving();
-                    if (Time.time >= nextAttackTime)
+                    if (attackRoutine == null && Time.time >= nextAttackTime)
                     {
                         bool useHeavyAttack = Time.time >= nextHeavyAttackTime;
                         attackRoutine = StartCoroutine(AttackRoutine(useHeavyAttack));
@@ -148,14 +153,22 @@ public class BossController : MonoBehaviour, IDamageable
                 break;
 
             case State.Attacking:
+                if (attackRoutine == null)
+                {
+                    currentState = State.Chase;
+                }
                 break;
         }
     }
 
     public void ActivateBoss()
     {
-        animator.speed = 1f;
-        if (currentState == State.Idle)
+        if (animator != null)
+        {
+            animator.speed = 1f;
+        }
+
+        if (currentState == State.Idle || (currentState == State.Attacking && attackRoutine == null))
         {
             currentState = State.Chase;
         }
@@ -199,6 +212,44 @@ public class BossController : MonoBehaviour, IDamageable
         if (boss != null)
         {
             boss.linearVelocity = new Vector2(0f, boss.linearVelocity.y);
+        }
+    }
+
+    private void ResetCombatState()
+    {
+        if (attackRoutine != null)
+        {
+            StopCoroutine(attackRoutine);
+            attackRoutine = null;
+        }
+
+        currentState = State.Idle;
+        isEnraged = false;
+        nextAttackTime = 0f;
+        nextHeavyAttackTime = Time.time + GetNextHeavyAttackCooldown();
+
+        DisableWeapon();
+        SetBossWeaponDamage(GetCurrentNormalAttackDamage());
+
+        if (boss != null)
+        {
+            boss.linearVelocity = Vector2.zero;
+        }
+
+        if (animator != null)
+        {
+            animator.speed = 1f;
+            animator.ResetTrigger("Attack");
+            animator.ResetTrigger("Hurt");
+            animator.SetBool("Dead", false);
+            animator.SetFloat("Speed", 0f);
+            animator.Play("BossIdle", 0, 0f);
+        }
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.enabled = true;
+            spriteRenderer.color = Color.white;
         }
     }
 
@@ -275,8 +326,10 @@ public class BossController : MonoBehaviour, IDamageable
         float attackAnimationSpeed = isHeavyAttack ? Mathf.Max(heavyAttackAnimationSpeed, 0.01f) : 1f;
 
         SetBossWeaponDamage(attackDamage);
+        animator.ResetTrigger("Hurt");
+        animator.ResetTrigger("Attack");
         animator.speed = attackAnimationSpeed;
-        animator.SetTrigger("Attack");
+        animator.CrossFade("BossAttack", 0.05f, 0, 0f);
 
         float attackDuration = attackAnimationClipLength / attackAnimationSpeed;
         if (isHeavyAttack)

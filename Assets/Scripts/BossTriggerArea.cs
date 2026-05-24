@@ -47,18 +47,12 @@ public class BossArenaTrigger : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player") && !hasTriggered)
-        {
-            hasTriggered = true;
+        TryTriggerArena(collision);
+    }
 
-            PlayerController player = collision.GetComponent<PlayerController>();
-
-            if (bossHealthBarUI != null) bossHealthBarUI.SetActive(true);
-            if (bossMusic != null) bossMusic.Play();
-
-            ActivateBoss();
-            StartCameraRoutine(CinematicReveal(player));
-        }
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        TryTriggerArena(collision);
     }
 
     private void OnTriggerExit2D(Collider2D collision)
@@ -77,6 +71,24 @@ public class BossArenaTrigger : MonoBehaviour
         if (bossMusic != null) bossMusic.Stop();
 
         StartCameraRoutine(ResetCameraZoom());
+    }
+
+    private void TryTriggerArena(Collider2D collision)
+    {
+        if (!collision.CompareTag("Player") || hasTriggered)
+        {
+            return;
+        }
+
+        hasTriggered = true;
+
+        PlayerController player = collision.GetComponent<PlayerController>();
+
+        if (bossHealthBarUI != null) bossHealthBarUI.SetActive(true);
+        if (bossMusic != null) bossMusic.Play();
+
+        ActivateBoss();
+        StartCameraRoutine(CinematicReveal(player));
     }
 
     private void StartCameraRoutine(IEnumerator routine)
