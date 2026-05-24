@@ -22,10 +22,10 @@
 - [x] Coin count on screen
 - [ ] Save point
 - [ ] Level up system
-- [ ] Basic enemies
-- [ ] Block
+- [x] Basic enemies
+- [x] Block
 - [ ] Inventory
-- [ ] Heal animation and block animation for player
+- [x] Heal animation and block animation for player
 - [ ] Cat merchant
 - [ ] Background
 - [ ] Audio effects
