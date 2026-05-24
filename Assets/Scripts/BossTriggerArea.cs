@@ -95,15 +95,14 @@ public class BossArenaTrigger : MonoBehaviour
     {
         StopActiveCameraRoutine();
 
-        MonoBehaviour coroutineRunner = GetCameraCoroutineRunner();
-        if (coroutineRunner == null)
+        if (!isActiveAndEnabled)
         {
             ResetCameraZoomInstantly();
             return;
         }
 
-        activeCameraRoutineRunner = coroutineRunner;
-        activeCameraRoutine = coroutineRunner.StartCoroutine(routine);
+        activeCameraRoutineRunner = this;
+        activeCameraRoutine = StartCoroutine(routine);
     }
 
     private void StopActiveCameraRoutine()
@@ -118,11 +117,6 @@ public class BossArenaTrigger : MonoBehaviour
             activeCameraRoutine = null;
             activeCameraRoutineRunner = null;
         }
-    }
-
-    private MonoBehaviour GetCameraCoroutineRunner()
-    {
-        return BossArenaCoroutineRunner.Instance;
     }
 
     private void ActivateBoss()
@@ -212,37 +206,5 @@ public class BossArenaTrigger : MonoBehaviour
         }
 
         ActivateBoss();
-    }
-}
-
-class BossArenaCoroutineRunner : MonoBehaviour
-{
-    private static BossArenaCoroutineRunner instance;
-
-    public static BossArenaCoroutineRunner Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                GameObject runnerObject = new GameObject("BossArenaCoroutineRunner");
-                DontDestroyOnLoad(runnerObject);
-                instance = runnerObject.AddComponent<BossArenaCoroutineRunner>();
-            }
-
-            return instance;
-        }
-    }
-
-    private void Awake()
-    {
-        if (instance != null && instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        instance = this;
-        DontDestroyOnLoad(gameObject);
     }
 }
