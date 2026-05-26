@@ -318,6 +318,7 @@ public class BossController : MonoBehaviour, IDamageable
         currentState = State.Attacking;
         StopMoving();
         LookAtPlayer();
+        DisableWeapon();
 
         int normalDamage = GetCurrentNormalAttackDamage();
         int attackDamage = isHeavyAttack
@@ -546,7 +547,16 @@ public class BossController : MonoBehaviour, IDamageable
         }
         else
         {
-            animator.SetTrigger("Hurt"); 
+            if (attackRoutine != null)
+            {
+                StopCoroutine(attackRoutine);
+                attackRoutine = null;
+                DisableWeapon();
+                animator.speed = 1f;
+                nextAttackTime = Time.time + attackCooldown;
+                currentState = State.Chase;
+            }
+            animator.SetTrigger("Hurt");
         }
 
     }

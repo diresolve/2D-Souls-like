@@ -95,7 +95,7 @@ public class BossArenaTrigger : MonoBehaviour
     {
         StopActiveCameraRoutine();
 
-        if (!isActiveAndEnabled)
+        if (!gameObject.activeInHierarchy || !enabled)
         {
             ResetCameraZoomInstantly();
             return;
