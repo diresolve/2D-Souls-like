@@ -15,6 +15,10 @@ public class BossArenaTrigger : MonoBehaviour
     [SerializeField] private float zoomedOutSize = 8f;
     [SerializeField] private float zoomSpeed = 2f;
 
+    [Header("Loot")]
+    [SerializeField] private Transform soulDropPoint;
+    public Transform SoulDropPoint { get { return soulDropPoint; } }
+
     [Header("Timing")]
     [SerializeField] private float cinematicPauseDuration = 2f;
 

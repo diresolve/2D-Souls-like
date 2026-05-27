@@ -9002,7 +9002,8 @@ Transform:
   m_LocalPosition: {x: 42.11, y: 0.3199997, z: 0}
   m_LocalScale: {x: 1, y: 2.268, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1749460838}
   m_Father: {fileID: 480255397}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &638731923
@@ -9024,6 +9025,7 @@ MonoBehaviour:
   bossFocusTarget: {fileID: 1378997897}
   zoomedOutSize: 8
   zoomSpeed: 3
+  soulDropPoint: {fileID: 1749460838}
   cinematicPauseDuration: 1
 --- !u!82 &638731924
 AudioSource:
@@ -38586,6 +38588,8 @@ MonoBehaviour:
   spriteRenderer: {fileID: 1378997896}
   bossWeapon: {fileID: 2119290882}
   currentHealth: 0
+  soulPickupPrefab: {fileID: 7365746531202262184, guid: 99df27f67d9632f48aa20d44d1e1f904, type: 3}
+  soulReward: 500
   normalAttackDamage: 25
   heavyAttackDamageMultiplier: 1.5
   heavyAttackAnimationSpeed: 0.5
@@ -39655,6 +39659,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1732228376}
   m_CullTransparentMesh: 1
+--- !u!1 &1749460837
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1749460838}
+  m_Layer: 0
+  m_Name: SoulDropPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1749460838
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1749460837}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 12, y: 0.17, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 638731922}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1782511618
 GameObject:
   m_ObjectHideFlags: 0
@@ -40182,6 +40217,7 @@ MonoBehaviour:
   coinCount: {fileID: 843574336}
   currentSouls: 0
   drop: {fileID: 7365746531202262184, guid: 99df27f67d9632f48aa20d44d1e1f904, type: 3}
+  coinTweenDuration: 1
   dashingVelocity: 24
   dashingTime: 0.02
   dashInvulnerabilityTime: 0.2

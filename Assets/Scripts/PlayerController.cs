@@ -92,6 +92,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] TextMeshProUGUI coinCount;
     [SerializeField] private int currentSouls = 0;
     [SerializeField] private GameObject drop;
+    [SerializeField] private float coinTweenDuration = 1f;
+    private int displayedSouls = 0;
+    private Coroutine coinTweenRoutine;
 
     [Header("Dashing")]
     [SerializeField] private float dashingVelocity = 24f;
@@ -1141,7 +1144,37 @@ public class PlayerController : MonoBehaviour
     public void AddSouls(int amount)
     {
         currentSouls += amount;
-        UpdateCoinText();
+
+        if (coinTweenRoutine != null) StopCoroutine(coinTweenRoutine);
+        coinTweenRoutine = StartCoroutine(TweenCoinDisplay());
+    }
+
+    private IEnumerator TweenCoinDisplay()
+    {
+        int start = displayedSouls;
+        int target = currentSouls;
+
+        if (coinTweenDuration <= 0f || start == target)
+        {
+            displayedSouls = target;
+            if (coinCount != null) coinCount.text = displayedSouls.ToString();
+            coinTweenRoutine = null;
+            yield break;
+        }
+
+        float elapsed = 0f;
+        while (elapsed < coinTweenDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / coinTweenDuration);
+            displayedSouls = Mathf.RoundToInt(Mathf.Lerp(start, target, t));
+            if (coinCount != null) coinCount.text = displayedSouls.ToString();
+            yield return null;
+        }
+
+        displayedSouls = target;
+        if (coinCount != null) coinCount.text = displayedSouls.ToString();
+        coinTweenRoutine = null;
     }
 
     private IEnumerator PerformInteraction()
@@ -1246,6 +1279,14 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateCoinText()
     {
+        displayedSouls = currentSouls;
+
+        if (coinTweenRoutine != null)
+        {
+            StopCoroutine(coinTweenRoutine);
+            coinTweenRoutine = null;
+        }
+
         if (coinCount != null)
         {
             coinCount.text = currentSouls.ToString();

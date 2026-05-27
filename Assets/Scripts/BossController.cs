@@ -27,6 +27,10 @@ public class BossController : MonoBehaviour, IDamageable
     [SerializeField] private GameObject bossWeapon;
     [SerializeField] private int currentHealth;
 
+    [Header("Rewards")]
+    [SerializeField] private GameObject soulPickupPrefab;
+    [SerializeField] private int soulReward = 500;
+
     [Header("Heavy Attack")]
     [SerializeField] private int normalAttackDamage = 25;
     [SerializeField] private float heavyAttackDamageMultiplier = 1.5f;
@@ -493,6 +497,8 @@ public class BossController : MonoBehaviour, IDamageable
         {
             arenaTrigger.OnBossDefeated();
         }
+
+        SpawnSoulPickup();
         //if (spriteRenderer != null)
         //{
         //    spriteRenderer.color = Color.white;
@@ -511,6 +517,22 @@ public class BossController : MonoBehaviour, IDamageable
 
         GetComponent<Collider2D>().enabled = false;
         StartCoroutine(FloatUpOnDeath());
+    }
+
+    private void SpawnSoulPickup()
+    {
+        if (soulPickupPrefab == null || soulReward <= 0) return;
+
+        Vector3 spawnPosition = arenaTrigger != null && arenaTrigger.SoulDropPoint != null
+            ? arenaTrigger.SoulDropPoint.position
+            : transform.position;
+
+        GameObject pickup = Instantiate(soulPickupPrefab, spawnPosition, Quaternion.identity);
+        LostSoul soulScript = pickup.GetComponent<LostSoul>();
+        if (soulScript != null)
+        {
+            soulScript.SetSoulValue(soulReward);
+        }
     }
 
     private IEnumerator FloatUpOnDeath()
