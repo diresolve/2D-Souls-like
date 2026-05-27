@@ -63,6 +63,11 @@ public class BossController : MonoBehaviour, IDamageable
     [SerializeField] private float deathFloatHeight = 1.5f;
     [SerializeField] private float deathFloatDuration = 1.1f;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip deathSound;
+    [SerializeField] private float deathAnimationSpeedMultiplier = 1.5f;
+
     //private int currentHealth;
     private Rigidbody2D boss;
     private Collider2D bodyCollider;
@@ -491,12 +496,21 @@ public class BossController : MonoBehaviour, IDamageable
 
     private void Die()
     {
+        float soundDuration = deathFloatDuration;
+
+        if (audioSource != null && deathSound != null)
+        {
+            audioSource.PlayOneShot(deathSound);
+            soundDuration = deathSound.length;
+            deathFloatDuration = soundDuration;
+        }
         StopAllCoroutines();
         attackRoutine = null;
         if (arenaTrigger != null)
         {
             arenaTrigger.OnBossDefeated();
         }
+<<<<<<< Updated upstream
 
         SpawnSoulPickup();
         //if (spriteRenderer != null)
@@ -507,8 +521,11 @@ public class BossController : MonoBehaviour, IDamageable
         //{
         //    healthBar.gameObject.SetActive(false);
         //}
+=======
+>>>>>>> Stashed changes
         currentState = State.Dead;
-        animator.speed = 1f;
+        //animator.speed = 1f;
+        animator.speed = 1f / Mathf.Max(soundDuration, 0.1f) * deathAnimationSpeedMultiplier;
         animator.SetBool("Dead", true);
         boss.linearVelocity = Vector2.zero;
         boss.gravityScale = 0f;
