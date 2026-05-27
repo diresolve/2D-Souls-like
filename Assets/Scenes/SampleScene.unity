@@ -9070,13 +9070,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArenaTrigger
   bossHealthBarUI: {fileID: 535289250}
-  musicController: {fileID: 0}
-  bossController: {fileID: 0}
+  musicController: {fileID: 442521069}
+  bossController: {fileID: 1378997898}
   virtualCamera: {fileID: 612258851}
   bossFocusTarget: {fileID: 1378997897}
   zoomedOutSize: 8
   zoomSpeed: 3
-  soulDropPoint: {fileID: 1749460838}
+  soulDropPoint: {fileID: 0}
   cinematicPauseDuration: 1
 --- !u!82 &638731924
 AudioSource:

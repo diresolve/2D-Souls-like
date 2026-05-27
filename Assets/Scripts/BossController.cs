@@ -510,9 +510,8 @@ public class BossController : MonoBehaviour, IDamageable
         {
             arenaTrigger.OnBossDefeated();
         }
-<<<<<<< Updated upstream
 
-        SpawnSoulPickup();
+        //SpawnSoulPickup();
         //if (spriteRenderer != null)
         //{
         //    spriteRenderer.color = Color.white;
@@ -521,8 +520,6 @@ public class BossController : MonoBehaviour, IDamageable
         //{
         //    healthBar.gameObject.SetActive(false);
         //}
-=======
->>>>>>> Stashed changes
         currentState = State.Dead;
         //animator.speed = 1f;
         animator.speed = 1f / Mathf.Max(soundDuration, 0.1f) * deathAnimationSpeedMultiplier;
@@ -568,6 +565,8 @@ public class BossController : MonoBehaviour, IDamageable
         }
 
         transform.position = endPosition;
+
+        SpawnSoulPickup();
     }
 
     public void TakeDamage(int amount, Vector2 attackDirection)
