@@ -20,7 +20,6 @@
 
 - [x] Checkpoint animation
 - [x] Coin count on screen
-- [ ] Save point
 - [ ] Level up system
 - [x] Basic enemies
 - [x] Block
@@ -35,7 +34,6 @@
 - Basic enemies: [Skeleton Pack](https://jesse-m.itch.io/skeleton-pack) - mozda ove?
 - Enemy idea: [Hell Hound Sprite Animation](https://ansimuz.itch.io/hell-hound-sprite-animation) - ovo izgleda bolesno
 - Player effects: [Pixel Holy Effects Pack 01](https://sentient-dream-studio.itch.io/pixel-holy-effects-pack01)
-- Cat merchant: [Pet Cats Pixel Art Pack](https://assetstore.unity.com/packages/2d/characters/pet-cats-pixel-art-pack-248340)
 
 ## Audio Ideas
 
