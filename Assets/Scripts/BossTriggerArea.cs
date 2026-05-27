@@ -6,7 +6,7 @@ public class BossArenaTrigger : MonoBehaviour
 {
     [Header("The Reveal")]
     [SerializeField] private GameObject bossHealthBarUI;
-    [SerializeField] private AudioSource bossMusic;
+    [SerializeField] private MusicController musicController;
     [SerializeField] private BossController bossController;
 
     [Header("Cinemachine Setup")]
@@ -76,7 +76,7 @@ public class BossArenaTrigger : MonoBehaviour
         hasTriggered = false;
 
         if (bossHealthBarUI != null) bossHealthBarUI.SetActive(false);
-        if (bossMusic != null) bossMusic.Stop();
+        if (musicController != null) musicController.PlayBackgroundMusic();
 
         StartCameraRoutine(ResetCameraZoom());
     }
@@ -87,7 +87,7 @@ public class BossArenaTrigger : MonoBehaviour
         hasTriggered = false;
 
         if (bossHealthBarUI != null) bossHealthBarUI.SetActive(false);
-        if (bossMusic != null) bossMusic.Stop();
+        if (musicController != null) musicController.PlayBackgroundMusic();
 
         StartCameraRoutine(ResetCameraZoom());
     }
@@ -104,7 +104,7 @@ public class BossArenaTrigger : MonoBehaviour
         PlayerController player = collision.GetComponent<PlayerController>();
 
         if (bossHealthBarUI != null) bossHealthBarUI.SetActive(true);
-        if (bossMusic != null) bossMusic.Play();
+        if (musicController != null) musicController.PlayBossMusic();
 
         ActivateBoss();
         StartCameraRoutine(CinematicReveal(player));
