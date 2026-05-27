@@ -19,12 +19,14 @@ public class BossArenaTrigger : MonoBehaviour
     [SerializeField] private float cinematicPauseDuration = 2f;
 
     private bool hasTriggered = false;
+    private bool defeated = false;
     private float originalZoomSize;
     private bool hasOriginalZoomSize = false;
     private Coroutine activeCameraRoutine;
     private MonoBehaviour activeCameraRoutineRunner;
 
     public bool HasTriggered { get { return hasTriggered; } }
+    public bool IsDefeated { get { return defeated; } }
 
     private void Awake()
     {
@@ -65,6 +67,19 @@ public class BossArenaTrigger : MonoBehaviour
 
     public void ResetArea()
     {
+        if (defeated) return;
+
+        hasTriggered = false;
+
+        if (bossHealthBarUI != null) bossHealthBarUI.SetActive(false);
+        if (bossMusic != null) bossMusic.Stop();
+
+        StartCameraRoutine(ResetCameraZoom());
+    }
+
+    public void OnBossDefeated()
+    {
+        defeated = true;
         hasTriggered = false;
 
         if (bossHealthBarUI != null) bossHealthBarUI.SetActive(false);
@@ -75,7 +90,7 @@ public class BossArenaTrigger : MonoBehaviour
 
     private void TryTriggerArena(Collider2D collision)
     {
-        if (!collision.CompareTag("Player") || hasTriggered)
+        if (defeated || !collision.CompareTag("Player") || hasTriggered)
         {
             return;
         }

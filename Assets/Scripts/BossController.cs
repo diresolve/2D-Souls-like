@@ -491,7 +491,7 @@ public class BossController : MonoBehaviour, IDamageable
         attackRoutine = null;
         if (arenaTrigger != null)
         {
-            arenaTrigger.ResetArea();
+            arenaTrigger.OnBossDefeated();
         }
         //if (spriteRenderer != null)
         //{
