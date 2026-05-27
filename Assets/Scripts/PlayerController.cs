@@ -112,6 +112,17 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float wallSlideMaxFallSpeed = 3f;
     [SerializeField] private float wallSlideInputThreshold = 0.1f;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip walkClip;
+    [SerializeField] private AudioClip jumpClip;
+    [SerializeField] private AudioClip dashClip;
+    [SerializeField] private AudioClip parryClip;
+    [SerializeField] private float walkSoundInterval = 0.3f;
+    [SerializeField] private AudioClip hurtClip;
+    [SerializeField] private AudioClip coinPickupClip;
+    private float walkTimer;
+
     private Rigidbody2D rb2D;
 
     private HeavyDoor currentInteractableDoor;
@@ -275,6 +286,7 @@ public class PlayerController : MonoBehaviour
         if (WasActionPressedThisFrame(jumpAction) /*&& isGrounded*/ && !isDashing && jumpsRemaining > 0)
         {
             jumpRequested = true;
+            if (audioSource != null && jumpClip != null) audioSource.PlayOneShot(jumpClip);
         }
 
         if (WasActionPressedThisFrame(healAction))
@@ -294,6 +306,22 @@ public class PlayerController : MonoBehaviour
                 StartCoroutine(Dash());
             }
             
+        }
+
+        if (isGrounded && Mathf.Abs(moveHorizontal) > 0.1f && !isDashing && canMove)
+        {
+            walkTimer -= Time.deltaTime;
+            if (walkTimer <= 0f)
+            {
+                if (audioSource != null && walkClip != null)
+                    audioSource.PlayOneShot(walkClip);
+
+                walkTimer = walkSoundInterval;
+            }
+        }
+        else
+        {
+            walkTimer = 0f;
         }
 
         TurnCheck();
@@ -959,6 +987,8 @@ public class PlayerController : MonoBehaviour
 
             if (combatScript.TryBlockAttack(attackDirectionX, isFacingRight))
             {
+                if (audioSource != null && parryClip != null) audioSource.PlayOneShot(parryClip);
+
                 if (canConsumeStamina(25f))
                 {
 
@@ -1046,6 +1076,11 @@ public class PlayerController : MonoBehaviour
 
     private void TakeDamage(int damageAmount, bool isBoss = false)
     {
+        if (audioSource != null && hurtClip != null)
+        {
+            audioSource.PlayOneShot(hurtClip);
+        }
+
         currentHealth = Mathf.Max(currentHealth - damageAmount, 0);
         UpdateHealthBar();
 
@@ -1143,6 +1178,11 @@ public class PlayerController : MonoBehaviour
 
     public void AddSouls(int amount)
     {
+        if (audioSource != null && coinPickupClip != null)
+        {
+            audioSource.PlayOneShot(coinPickupClip);
+        }
+
         currentSouls += amount;
 
         if (coinTweenRoutine != null) StopCoroutine(coinTweenRoutine);
@@ -1200,6 +1240,8 @@ public class PlayerController : MonoBehaviour
         lastDashStartedAt = Time.time;
         hasUsedDashAttackThisDash = false;
         StartDashInvulnerability();
+
+        if (audioSource != null && dashClip != null) audioSource.PlayOneShot(dashClip);
 
         float originalGravity = rb2D.gravityScale;
         rb2D.gravityScale = 0f;

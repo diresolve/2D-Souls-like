@@ -30,6 +30,12 @@ public class PlayerCombat : MonoBehaviour
     //[SerializeField] private float blockStaminaDrainRate = 10f;
     //[SerializeField] private float blockHitStaminaCost = 25f;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip attackClip;
+    [SerializeField] private AudioClip blockMotionClip;
+ 
+
     private void Update()
     {
         if (blockCooldownTimer > 0f)
@@ -76,6 +82,11 @@ public class PlayerCombat : MonoBehaviour
     {
         IsBlocking = true;
         requiresBlockRelease = true;
+
+        if (audioSource != null && blockMotionClip != null)
+        {
+            audioSource.PlayOneShot(blockMotionClip);
+        }
 
         PlayerController playerController = GetPlayerController();
         if (playerController != null && playerController.IsGrounded)
@@ -152,6 +163,8 @@ public class PlayerCombat : MonoBehaviour
         isAttacking = true;
         AttackSequence++;
 
+        if (audioSource != null && attackClip != null) audioSource.PlayOneShot(attackClip);
+
         if (playerController != null && playerController.IsGrounded)
         {
             playerController.LockMovementForAttack(true);
@@ -213,6 +226,8 @@ public class PlayerCombat : MonoBehaviour
         Vector3 hitPosition = transform.position + Vector3.right * attackDirection * dashAttackForwardOffset;
         Collider2D[] hitEnemies = Physics2D.OverlapBoxAll(hitPosition, dashAttackBoxSize, 0f, enemyLayers);
         DamageEnemies(hitEnemies, dashAttackDamage);
+
+        if (audioSource != null && attackClip != null) audioSource.PlayOneShot(attackClip);
 
         yield return new WaitForSeconds(dashAttackRecoveryTime);
 
