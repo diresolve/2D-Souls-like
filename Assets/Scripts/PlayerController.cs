@@ -993,9 +993,10 @@ public class PlayerController : MonoBehaviour
             if (weaponDamage != null)
             {
                 enemySwordDamage = weaponDamage.Damage;
+
             }
 
-            TakeDamage(enemySwordDamage);
+            TakeDamage(enemySwordDamage, weaponDamage != null);
             if (isDead) return;
             rb2D.linearVelocity = Vector2.zero;
             float knockbackDirection = transform.position.x < collision.transform.position.x ? -1f : 1f;
@@ -1040,14 +1041,22 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void TakeDamage(int damageAmount)
+    private void TakeDamage(int damageAmount, bool isBoss = false)
     {
         currentHealth = Mathf.Max(currentHealth - damageAmount, 0);
         UpdateHealthBar();
 
         if (currentHealth <= 0)
         {
-            Die();
+            if (isBoss)
+            {
+                Audio audioScript = GetComponentInChildren<Audio>();
+                if (audioScript != null)
+                {
+                    audioScript.isBossDeath = true;
+                }
+            }
+            Die(isBoss);
         }
     }
 
@@ -1078,7 +1087,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void Die()
+    private void Die(bool isBoss = false)
     {
         isDead = true;
         //gameObject.SetActive(false);
@@ -1114,14 +1123,16 @@ public class PlayerController : MonoBehaviour
         //_gameOverScreen.SetActive(true);
         //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 
-        StartCoroutine(GameOverRoutine());
+        StartCoroutine(GameOverRoutine(isBoss));
     }
 
-    private IEnumerator GameOverRoutine()
+    private IEnumerator GameOverRoutine(bool isBoss)
     {
         _gameOverScreen.SetActive(true);
         rb2D.simulated = false;
-        yield return new WaitForSecondsRealtime(2f);
+
+        float waitTime = isBoss ? 8.5f : 2f;
+        yield return new WaitForSecondsRealtime(waitTime);
 
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
