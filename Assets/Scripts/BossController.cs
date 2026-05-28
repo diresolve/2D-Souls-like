@@ -68,6 +68,10 @@ public class BossController : MonoBehaviour, IDamageable
     [SerializeField] private AudioClip deathSound;
     [SerializeField] private float deathAnimationSpeedMultiplier = 1.5f;
 
+    [SerializeField] private AudioClip normalSlashSound;
+    [SerializeField] private AudioClip heavySlashSound;
+    [SerializeField] private float heavyAttackSoundDelay = 0.3f;
+
     //private int currentHealth;
     private Rigidbody2D boss;
     private Collider2D bodyCollider;
@@ -341,6 +345,23 @@ public class BossController : MonoBehaviour, IDamageable
         animator.speed = attackAnimationSpeed;
         animator.CrossFade("BossAttack", 0.05f, 0, 0f);
 
+        if (audioSource != null)
+        {
+            //AudioClip soundToPlay = isHeavyAttack ? heavySlashSound : normalSlashSound;
+            //if (soundToPlay != null)
+            //{
+            //    audioSource.PlayOneShot(soundToPlay);
+            //}
+            if (isHeavyAttack && heavySlashSound != null)
+            {
+                StartCoroutine(PlayDelayedSound(heavySlashSound, heavyAttackSoundDelay));
+            }
+            else if (!isHeavyAttack && normalSlashSound != null)
+            {
+                audioSource.PlayOneShot(normalSlashSound);
+            }
+        }
+
         float attackDuration = attackAnimationClipLength / attackAnimationSpeed;
         if (isHeavyAttack)
         {
@@ -355,6 +376,15 @@ public class BossController : MonoBehaviour, IDamageable
         }
 
         FinishAttack(isHeavyAttack);
+    }
+
+    private IEnumerator PlayDelayedSound(AudioClip clip, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
     }
 
     private void FinishAttack(bool wasHeavyAttack)

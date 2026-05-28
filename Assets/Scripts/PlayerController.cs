@@ -121,6 +121,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float walkSoundInterval = 0.3f;
     [SerializeField] private AudioClip hurtClip;
     [SerializeField] private AudioClip coinPickupClip;
+
+    [SerializeField] private AudioClip healClip;
+
     private float walkTimer;
 
     private Rigidbody2D rb2D;
@@ -173,6 +176,8 @@ public class PlayerController : MonoBehaviour
     private bool hasUsedDashAttackThisDash;
     private Coroutine dashInvulnerabilityCoroutine;
 
+    private PlayerInventory inventory;
+
     private void Awake()
     {
         combatScript = GetComponent<PlayerCombat>();
@@ -203,6 +208,8 @@ public class PlayerController : MonoBehaviour
         InitializeAnimationReferences();
         originalMaxSpeed = maxMoveSpeed;
         currentHealth = maxHealth;
+
+        inventory = GetComponent<PlayerInventory>();
 
         if (healthBar != null)
         {
@@ -289,9 +296,14 @@ public class PlayerController : MonoBehaviour
             if (audioSource != null && jumpClip != null) audioSource.PlayOneShot(jumpClip);
         }
 
-        if (WasActionPressedThisFrame(healAction))
+        //if (WasActionPressedThisFrame(healAction))
+        //{
+        //    StartCoroutine(UseHealingFlask());
+        //}
+
+        if (WasActionPressedThisFrame(healAction) && currentHealth < maxHealth)
         {
-            StartCoroutine(UseHealingFlask());
+            inventory.ConsumeFirstHealthPotion();
         }
 
         if (WasActionPressedThisFrame(interactAction) && currentInteractableDoor != null)
@@ -865,26 +877,63 @@ public class PlayerController : MonoBehaviour
         return action != null && action.WasPressedThisFrame();
     }
 
-    private IEnumerator UseHealingFlask()
+    public bool TryUseHealingItem(int amount)
     {
-        if (!canMove) yield break;
+        if (!canMove) return false;
+        StartCoroutine(UseHealingFlask(amount));
+        return true;
+    }
+
+    private IEnumerator UseHealingFlask(int amount)
+    {
         canMove = false;
         rb2D.linearVelocity = new Vector2(0f, rb2D.linearVelocity.y);
-        if (healObject != null)
+
+        if (audioSource != null && healClip != null)
         {
-            healObject.SetActive(true);
+            audioSource.PlayOneShot(healClip);
         }
-        //if (healAnimator != null)
-        //{
-        //    healAnimator.SetTrigger("Heal");
-        //}
+        
+
+        if (healObject != null) healObject.SetActive(true);
         yield return new WaitForSeconds(healTime);
-        if (healObject != null)
-        {
-            healObject.SetActive(false);
-        }
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        UpdateHealthBar();
+        if (healObject != null) healObject.SetActive(false);
         canMove = true;
     }
+
+    public bool SpendSouls(int amount)
+    {
+        if (currentSouls >= amount)
+        {
+            currentSouls -= amount;
+            UpdateCoinText();
+            return true;
+        }
+        return false;
+    }
+
+    //private IEnumerator UseHealingFlask()
+    //{
+    //    if (!canMove) yield break;
+    //    canMove = false;
+    //    rb2D.linearVelocity = new Vector2(0f, rb2D.linearVelocity.y);
+    //    if (healObject != null)
+    //    {
+    //        healObject.SetActive(true);
+    //    }
+    //    //if (healAnimator != null)
+    //    //{
+    //    //    healAnimator.SetTrigger("Heal");
+    //    //}
+    //    yield return new WaitForSeconds(healTime);
+    //    if (healObject != null)
+    //    {
+    //        healObject.SetActive(false);
+    //    }
+    //    canMove = true;
+    //}
 
     private void OnCollisionEnter2D(Collision2D collision)
     {

@@ -20,6 +20,8 @@ public class MerchantCat : MonoBehaviour
     private bool playerInRange;
     private PlayerController playerInRangeRef;
 
+    public ItemData itemToSell;
+
     private void Awake()
     {
         if (interactPrompt != null) interactPrompt.SetActive(false);
@@ -59,10 +61,10 @@ public class MerchantCat : MonoBehaviour
         if (interactPrompt != null) interactPrompt.SetActive(false);
     }
 
-    private void Interact(PlayerController player)
-    {
-        PlayMeow();
-    }
+    //private void Interact(PlayerController player)
+    //{
+    //    PlayMeow();
+    //}
 
     private void PlayMeow()
     {
@@ -77,6 +79,33 @@ public class MerchantCat : MonoBehaviour
         {
             GameObject vfx = Instantiate(meowVfxPrefab, spawnPos, Quaternion.identity);
             if (meowVfxLifetime > 0f) Destroy(vfx, meowVfxLifetime);
+        }
+    }
+
+    private void Interact(PlayerController player)
+    {
+        PlayMeow();
+
+        PlayerInventory inventory = player.GetComponent<PlayerInventory>();
+
+        if (inventory != null && itemToSell != null)
+        {
+            if (player.SpendSouls(itemToSell.costInSouls))
+            {
+                if (inventory.AddItem(itemToSell))
+                {
+                    Debug.Log("Potion kupljen i spremljen u inventory!");
+                }
+                else
+                {
+                    player.AddSouls(itemToSell.costInSouls);
+                    Debug.Log("Inventory je pun!");
+                }
+            }
+            else
+            {
+                Debug.Log("Nemaš dovoljno duša!");
+            }
         }
     }
 }
