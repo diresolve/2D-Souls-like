@@ -114,6 +114,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioSource wallSlideSource;
     [SerializeField] private AudioClip walkClip;
     [SerializeField] private AudioClip jumpClip;
     [SerializeField] private AudioClip dashClip;
@@ -492,16 +493,34 @@ public class PlayerController : MonoBehaviour
 
         if (rb2D == null || bodyCollider == null || isGrounded || !canMove || Mathf.Abs(moveHorizontal) < wallSlideInputThreshold)
         {
+            UpdateWallSlideAudio();
             return;
         }
 
         if (rb2D.linearVelocity.y >= 0f)
         {
+            UpdateWallSlideAudio();
             return;
         }
 
         int moveDirection = moveHorizontal > 0f ? 1 : -1;
         isWallSliding = IsTouchingWall(moveDirection);
+
+        UpdateWallSlideAudio();
+    }
+
+    private void UpdateWallSlideAudio()
+    {
+        if (wallSlideSource == null) return;
+
+        if (isWallSliding && !wallSlideSource.isPlaying)
+        {
+            wallSlideSource.Play();
+        }
+        else if (!isWallSliding && wallSlideSource.isPlaying)
+        {
+            wallSlideSource.Stop();
+        }
     }
 
     private bool IsTouchingWall(int direction)
