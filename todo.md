@@ -2,13 +2,13 @@
 
 ## Boss
 
-- [ ] Character can't leave the arena until the boss dies or the player dies
+- [x] Character can't leave the arena until the boss dies or the player dies
 - [x] Boss gets faster movement and faster attacks at lower health
 - [x] Attack pattern
 - [x] Special attack
 - [x] Increase boss attack hitbox
 - [x] Screen shake on boss heavy attacks
-- [ ] Money drop on boss death
+- [x] Money drop on boss death
 
 ## Fixes
 
@@ -25,16 +25,6 @@
 - [x] Block
 - [ ] Inventory
 - [x] Heal animation and block animation for player
-- [ ] Cat merchant
+- [x] Cat merchant
 - [ ] Background
-- [ ] Audio effects
-
-## Asset Ideas
-
-- Basic enemies: [Skeleton Pack](https://jesse-m.itch.io/skeleton-pack) - mozda ove?
-- Enemy idea: [Hell Hound Sprite Animation](https://ansimuz.itch.io/hell-hound-sprite-animation) - ovo izgleda bolesno
-- Player effects: [Pixel Holy Effects Pack 01](https://sentient-dream-studio.itch.io/pixel-holy-effects-pack01)
-
-## Audio Ideas
-
-- Background music: [first couple seconds](https://www.youtube.com/watch?v=LFHHc2Wlpug)
+- [ ] Audio effects (for Boss Attack and Wall Slide)
