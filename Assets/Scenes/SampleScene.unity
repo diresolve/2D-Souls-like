@@ -44129,11 +44129,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-<<<<<<< Updated upstream
   m_Sprite: {fileID: -3318188226485093758, guid: ae72133dacba6ec4eb33ecde48f50e56, type: 3}
-=======
-  m_Sprite: {fileID: 0}
->>>>>>> Stashed changes
   m_Color: {r: 0.81886786, g: 0.20857947, b: 0.35597628, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -44194,13 +44190,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-<<<<<<< Updated upstream
   m_Offset: {x: 0, y: 0.038069725}
   m_Size: {x: 0.41752052, y: 1.0158625}
-=======
-  m_Offset: {x: -0.22, y: -0.12}
-  m_Size: {x: 0.5, y: 1}
->>>>>>> Stashed changes
   m_Direction: 0
 --- !u!50 &1866114888
 Rigidbody2D:
@@ -44275,11 +44266,8 @@ MonoBehaviour:
   maxHealth: 100
   spriteRenderer: {fileID: 1866114885}
   flashInterval: 0.1
-<<<<<<< Updated upstream
   healObject: {fileID: 589934404}
   healAnimator: {fileID: 589934406}
-=======
->>>>>>> Stashed changes
   animator: {fileID: 397775669}
   idleAnimationState: Idle
   runAnimationState: Run
@@ -44365,11 +44353,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-<<<<<<< Updated upstream
   m_Offset: {x: -0.034894943, y: 0.032723784}
-=======
-  m_Offset: {x: -0.24, y: -0.63}
->>>>>>> Stashed changes
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.4, y: 0.37}
@@ -44379,11 +44363,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-<<<<<<< Updated upstream
   m_Size: {x: 0.362545, y: 1.016195}
-=======
-  m_Size: {x: 0.37, y: 0.01}
->>>>>>> Stashed changes
   m_EdgeRadius: 0
 --- !u!114 &1866114891
 MonoBehaviour:
