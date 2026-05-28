@@ -164,4 +164,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0ad7b2a989b2764083a86b4872424c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LostSoul
+  isDeathRetrieval: 0
   soulValue: 10
+  animator: {fileID: 0}
+  appearDistance: 8
+  shatterAnimDuration: 0.5

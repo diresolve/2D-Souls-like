@@ -31,6 +31,12 @@ public class SkeletonController : MonoBehaviour, IDamageable
     [SerializeField] private float leashRange = 6f;
     private Vector2 homePosition;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip walkClip;
+    [SerializeField] private AudioClip attackClip;
+    [SerializeField] private AudioClip deathClip;
+
     private int currentHealth;
     private float nextAttackTime = 0f;
     private bool isFacingRight = true;
@@ -141,6 +147,8 @@ public class SkeletonController : MonoBehaviour, IDamageable
         animator.SetFloat("Speed", moveSpeed);
         float direction = Mathf.Sign(target.x - transform.position.x);
         rb.linearVelocity = new Vector2(direction * moveSpeed, rb.linearVelocity.y);
+
+        HandleWalkSound();
     }
 
     private void MoveTowardsPlayer()
@@ -148,12 +156,19 @@ public class SkeletonController : MonoBehaviour, IDamageable
         animator.SetFloat("Speed", moveSpeed);
         float direction = Mathf.Sign(player.position.x - transform.position.x);
         rb.linearVelocity = new Vector2(direction * moveSpeed, rb.linearVelocity.y);
+
+        HandleWalkSound();
     }
 
     private void StopMoving()
     {
         animator.SetFloat("Speed", 0f);
         rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+
+        if (audioSource != null && audioSource.isPlaying && audioSource.clip == walkClip)
+        {
+            audioSource.Stop();
+        }
     }
 
     private void LookAtPlayer()
@@ -241,6 +256,11 @@ public class SkeletonController : MonoBehaviour, IDamageable
     {
         currentState = State.Dead;
 
+        if (audioSource != null && deathClip != null)
+        {
+            audioSource.PlayOneShot(deathClip);
+        }
+
         StopAllCoroutines();
 
         if (skeletonWeapon != null)
@@ -265,11 +285,27 @@ public class SkeletonController : MonoBehaviour, IDamageable
     {
         if (skeletonWeapon != null)
             skeletonWeapon.SetActive(true);
+        if (audioSource != null && attackClip != null)
+        {
+            audioSource.PlayOneShot(attackClip);
+        }
     }
 
     public void DisableWeaponHitbox()
     {
         if (skeletonWeapon != null)
             skeletonWeapon.SetActive(false);
+    }
+
+    private void HandleWalkSound()
+    {
+        if (audioSource != null && walkClip != null)
+        {
+            if (!audioSource.isPlaying)
+            {
+                audioSource.clip = walkClip;
+                audioSource.Play();
+            }
+        }
     }
 }
