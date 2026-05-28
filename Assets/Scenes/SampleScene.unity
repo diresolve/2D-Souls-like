@@ -1576,6 +1576,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8107591147299652779, guid: 2c159d02954d16b48a1a41c7f5442e5a, type: 3}
   m_PrefabInstance: {fileID: 404056725}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &152516593 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3942276111307278959, guid: 2c159d02954d16b48a1a41c7f5442e5a, type: 3}
+  m_PrefabInstance: {fileID: 404056725}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce745ba417a602c4a85f27f712fb6cff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkeletonController
 --- !u!1 &171644782
 GameObject:
   m_ObjectHideFlags: 0
@@ -4061,6 +4072,7 @@ GameObject:
   - component: {fileID: 477710491}
   - component: {fileID: 477710490}
   - component: {fileID: 477710489}
+  - component: {fileID: 477710492}
   m_Layer: 0
   m_Name: SkeletonZone (1)
   m_TagString: Untagged
@@ -4141,6 +4153,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &477710492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 477710488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca06e9ba73562c34880ac923ed7a1510, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZoneManager
+  enemiesInZone:
+  - {fileID: 152516593}
+  - {fileID: 1060000663}
+  doorToOpen: {fileID: 1263610271}
 --- !u!4 &479682506 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4552379490772930529, guid: 6d2b33871b1876744835c6b2d1265108, type: 3}
@@ -20390,6 +20418,17 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &1060000663 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3942276111307278959, guid: 2c159d02954d16b48a1a41c7f5442e5a, type: 3}
+  m_PrefabInstance: {fileID: 466648488}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce745ba417a602c4a85f27f712fb6cff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkeletonController
 --- !u!1 &1064964683
 GameObject:
   m_ObjectHideFlags: 0
@@ -38119,7 +38158,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!61 &1263610270
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -38273,10 +38312,10 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.08235294, g: 0.13333334, b: 0.10588236, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -38293,13 +38332,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1263610269}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 12.96, y: 1.1, z: 0}
-  m_LocalScale: {x: 2.2555838, y: 7.2404237, z: 2.2555838}
+  m_LocalRotation: {x: -0, y: -0, z: -0.70537204, w: 0.70883733}
+  m_LocalPosition: {x: 3.54, y: -18.23, z: 0}
+  m_LocalScale: {x: 0.4611509, y: 3.070367, z: 2.010073}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -89.719}
 --- !u!1 &1264600448
 GameObject:
   m_ObjectHideFlags: 0

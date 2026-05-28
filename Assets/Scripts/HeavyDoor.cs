@@ -21,7 +21,7 @@ public class HeavyDoor : MonoBehaviour
         isOpened = true;
 
         Vector3 startPos = transform.position;
-        Vector3 endPos = startPos + new Vector3(0f, openDistance, 0f);
+        Vector3 endPos = startPos + new Vector3(openDistance, 0f, 0f);
         float elapsedTime = 0f;
 
         while (elapsedTime < openDuration)

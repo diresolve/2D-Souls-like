@@ -204,7 +204,7 @@ public class SkeletonController : MonoBehaviour, IDamageable
 
         animator.SetTrigger("Attack");
 
-        yield return new WaitForSeconds(0.4f);
+        yield return new WaitForSeconds(1f);
 
         nextAttackTime = Time.time + attackCooldown;
         currentState = State.Chase;

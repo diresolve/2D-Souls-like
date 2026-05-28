@@ -48,7 +48,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 50
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 1
@@ -73,7 +73,7 @@ BoxCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: c7e6e981373601b409d885d05cded5da, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -140,8 +140,6 @@ MonoBehaviour:
   walkClip: {fileID: 8300000, guid: 16cf5ad0f3742bd4daf7ad4e503dad7c, type: 3}
   attackClip: {fileID: 8300000, guid: d964fb0a07bcbe1449b861affcc18e59, type: 3}
   deathClip: {fileID: 8300000, guid: f1548cb02454a1645aa39d3b94379875, type: 3}
-  hurtClip: {fileID: 8300000, guid: d5bf0a9129b87d34fbec05c5f3a8dea2, type: 3}
-  walkSoundInterval: 0.4
 --- !u!82 &8532810704891864354
 AudioSource:
   m_ObjectHideFlags: 0
