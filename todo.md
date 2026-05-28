@@ -27,4 +27,4 @@
 - [x] Heal animation and block animation for player
 - [x] Cat merchant
 - [x] Background
-- [ ] Audio effects (for Boss Attack and Wall Slide)
+- [x] Audio effects (for Boss Attack and Wall Slide)
