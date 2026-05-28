@@ -18,6 +18,7 @@ public class CameraPanTrigger : MonoBehaviour
 
     private CinemachinePositionComposer _positionComposer;
     private Coroutine _panCoroutine;
+    private PlayerController _player;
     private float _originalXOffset;
     private float _originalYOffset;
     private float _originalOrthoSize;
@@ -47,12 +48,24 @@ public class CameraPanTrigger : MonoBehaviour
             _isPlayerInside = true;
             _hasTriggeredOnce = true;
 
+            _player = collision.GetComponent<PlayerController>();
+            if (_player != null)
+            {
+                _player.LockMovementForAttack(true);
+            }
+
             if (_audioSource != null && _triggerSound != null)
             {
                 _audioSource.PlayOneShot(_triggerSound);
             }
 
-            StartPanRoutine(_originalXOffset + _panRightOffset, _originalYOffset + _panDownOffset, _originalOrthoSize + _zoomOutOffset);
+            float actualPanRight = _panRightOffset;
+            if (_player != null && _player.IsFacingRight)
+            {
+                actualPanRight = -_panRightOffset;
+            }
+
+            StartPanRoutine(_originalXOffset + actualPanRight, _originalYOffset + _panDownOffset, _originalOrthoSize + _zoomOutOffset);
         }
     }
 
@@ -83,6 +96,11 @@ public class CameraPanTrigger : MonoBehaviour
         yield return new WaitForSeconds(_pauseAtBottomDuration);
 
         yield return StartCoroutine(LerpCamera(_originalXOffset, _originalYOffset, _originalOrthoSize));
+
+        if (_player != null)
+        {
+            _player.LockMovementForAttack(false);
+        }
     }
 
     private IEnumerator LerpCamera(float targetX, float targetY, float targetZoom)

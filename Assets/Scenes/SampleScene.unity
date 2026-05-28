@@ -10688,7 +10688,7 @@ MonoBehaviour:
   _audioSource: {fileID: 656232747}
   _triggerSound: {fileID: 8300000, guid: 88c3b4207469a70439cb26e279a7e6d4, type: 3}
   _virtualCamera: {fileID: 612258851}
-  _panRightOffset: -8
+  _panRightOffset: 8
   _panDownOffset: -16
   _zoomOutOffset: 2
   _panSpeed: 2
@@ -43047,7 +43047,7 @@ SpriteRenderer:
   m_Size: {x: 0.2, y: 0.29}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!4 &1658125477
 Transform:
@@ -44137,7 +44137,7 @@ SpriteRenderer:
   m_Size: {x: 0.69, y: 0.44}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
 --- !u!4 &1866114886
 Transform:
