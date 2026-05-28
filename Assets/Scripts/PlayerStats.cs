@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerStats : MonoBehaviour
@@ -29,6 +30,37 @@ public class PlayerStats : MonoBehaviour
     {
         if (playerController == null) playerController = GetComponent<PlayerController>();
         if (playerCombat == null) playerCombat = GetComponent<PlayerCombat>();
+    }
+
+    private IEnumerator Start()
+    {
+        yield return null;
+
+        if (GameManager.Instance == null || !GameManager.Instance.HasPersistedPlayerState) yield break;
+
+        int h = GameManager.Instance.PersistedHealthLevel;
+        int s = GameManager.Instance.PersistedStaminaLevel;
+        int d = GameManager.Instance.PersistedDamageLevel;
+
+        for (int i = 0; i < h; i++)
+        {
+            if (playerController != null) playerController.AddMaxHealthBonus(healthPerLevel);
+        }
+        healthLevel = h;
+
+        for (int i = 0; i < s; i++)
+        {
+            if (playerController != null) playerController.AddMaxStaminaBonus(staminaPerLevel);
+        }
+        staminaLevel = s;
+
+        for (int i = 0; i < d; i++)
+        {
+            if (playerCombat != null) playerCombat.AddDamageBonus(damagePerLevel);
+        }
+        damageLevel = d;
+
+        GameManager.Instance.ClearPersistedPlayerState();
     }
 
     public int GetCostForNextLevel(int currentLevel)

@@ -249,6 +249,12 @@ public class PlayerController : MonoBehaviour
         }
 
         RespawnSouls();
+
+        if (GameManager.Instance != null && GameManager.Instance.HasPersistedPlayerState)
+        {
+            currentSouls = GameManager.Instance.PersistedSouls;
+        }
+
         UpdateCoinText();
     }
 
@@ -1249,8 +1255,21 @@ public class PlayerController : MonoBehaviour
 
     public void TeleportToStart()
     {
-        transform.position = startPosition;
-        if (rb2D != null) rb2D.linearVelocity = Vector2.zero;
+        if (GameManager.Instance != null)
+        {
+            PlayerStats stats = GetComponent<PlayerStats>();
+            PlayerInventory inv = GetComponent<PlayerInventory>();
+
+            GameManager.Instance.SavePlayerState(
+                currentSouls,
+                stats != null ? stats.HealthLevel : 0,
+                stats != null ? stats.StaminaLevel : 0,
+                stats != null ? stats.DamageLevel : 0,
+                inv != null ? inv.items : null
+            );
+        }
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public int CurrentSouls => currentSouls;

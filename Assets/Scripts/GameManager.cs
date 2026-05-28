@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -8,6 +9,14 @@ public class GameManager : MonoBehaviour
     public Vector3 LastDeathPosition;
     public int DroppedSoulsAmount = 0;
     public bool HasDroppedSouls = false;
+
+    [Header("Persisted Player State")]
+    public bool HasPersistedPlayerState = false;
+    public int PersistedSouls;
+    public int PersistedHealthLevel;
+    public int PersistedStaminaLevel;
+    public int PersistedDamageLevel;
+    public List<ItemData> PersistedItems = new List<ItemData>();
 
     private void Awake()
     {
@@ -31,5 +40,24 @@ public class GameManager : MonoBehaviour
     {
         HasDroppedSouls = false;
         DroppedSoulsAmount = 0;
+    }
+
+    public void SavePlayerState(int souls, int healthLevel, int staminaLevel, int damageLevel, List<ItemData> items)
+    {
+        PersistedSouls = souls;
+        PersistedHealthLevel = healthLevel;
+        PersistedStaminaLevel = staminaLevel;
+        PersistedDamageLevel = damageLevel;
+
+        PersistedItems.Clear();
+        if (items != null) PersistedItems.AddRange(items);
+
+        HasPersistedPlayerState = true;
+    }
+
+    public void ClearPersistedPlayerState()
+    {
+        HasPersistedPlayerState = false;
+        PersistedItems.Clear();
     }
 }

@@ -17,6 +17,16 @@ public class PlayerInventory : MonoBehaviour
         player = GetComponent<PlayerController>();
     }
 
+    private void Start()
+    {
+        if (GameManager.Instance == null || !GameManager.Instance.HasPersistedPlayerState) return;
+
+        items.Clear();
+        items.AddRange(GameManager.Instance.PersistedItems);
+
+        if (inventoryUI != null) inventoryUI.RefreshUI();
+    }
+
     public bool AddItem(ItemData item)
     {
         if (items.Count >= capacity)
@@ -52,7 +62,7 @@ public class PlayerInventory : MonoBehaviour
             }
         }
 
-        Debug.Log("Nemaš Health Potion u inventoryju!");
+        Debug.Log("Nemaï¿½ Health Potion u inventoryju!");
         return false;
     }
 }
