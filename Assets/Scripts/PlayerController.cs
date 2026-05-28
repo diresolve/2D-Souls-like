@@ -200,6 +200,8 @@ public class PlayerController : MonoBehaviour
         DisposeOwnedInputActions();
     }
 
+    private Vector3 startPosition;
+
     private void Start()
     {
         _gameOverScreen.SetActive(false);
@@ -208,6 +210,7 @@ public class PlayerController : MonoBehaviour
         InitializeAnimationReferences();
         originalMaxSpeed = maxMoveSpeed;
         currentHealth = maxHealth;
+        startPosition = transform.position;
 
         inventory = GetComponent<PlayerInventory>();
 
@@ -1223,6 +1226,12 @@ public class PlayerController : MonoBehaviour
 
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void TeleportToStart()
+    {
+        transform.position = startPosition;
+        if (rb2D != null) rb2D.linearVelocity = Vector2.zero;
     }
 
     public void AddSouls(int amount)

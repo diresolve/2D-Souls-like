@@ -6,6 +6,7 @@ public class LostSoul : MonoBehaviour
     [Tooltip("Check this box ONLY on the prefab that spawns when the player dies.")]
     [SerializeField] private bool isDeathRetrieval = false;
     [SerializeField] private int soulValue = 10;
+    [SerializeField] private bool teleportPlayerOnCollect = false;
 
     [Header("Animation (Death Retrieval Only)")]
     [SerializeField] private Animator animator;
@@ -57,6 +58,11 @@ public class LostSoul : MonoBehaviour
         soulValue = amount;
     }
 
+    public void EnableTeleportOnCollect()
+    {
+        teleportPlayerOnCollect = true;
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player") && !hasBeenCollected)
@@ -66,6 +72,11 @@ public class LostSoul : MonoBehaviour
             {
                 hasBeenCollected = true;
                 player.AddSouls(soulValue);
+
+                if (teleportPlayerOnCollect)
+                {
+                    player.TeleportToStart();
+                }
 
                 if (isDeathRetrieval)
                 {

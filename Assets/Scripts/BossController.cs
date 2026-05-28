@@ -576,6 +576,7 @@ public class BossController : MonoBehaviour, IDamageable
         if (soulScript != null)
         {
             soulScript.SetSoulValue(soulReward);
+            soulScript.EnableTeleportOnCollect();
         }
     }
 
