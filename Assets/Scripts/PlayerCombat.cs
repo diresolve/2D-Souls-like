@@ -10,6 +10,12 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private LayerMask hazardLayers;
     [SerializeField] private int attackDamage = 10;
 
+    public void AddDamageBonus(int amount)
+    {
+        attackDamage += amount;
+        dashAttackDamage += amount;
+    }
+
     [Header("Timing")]
     [SerializeField] private float attackStartupTime = 0.1f;
     [SerializeField] private float attackRecoveryTime = 0.3f;

@@ -1253,6 +1253,49 @@ public class PlayerController : MonoBehaviour
         if (rb2D != null) rb2D.linearVelocity = Vector2.zero;
     }
 
+    public int CurrentSouls => currentSouls;
+
+    public void SetCombatEnabled(bool enabled)
+    {
+        if (attackAction != null)
+        {
+            if (enabled) attackAction.Enable();
+            else attackAction.Disable();
+        }
+
+        if (blockAction != null)
+        {
+            if (enabled) blockAction.Enable();
+            else blockAction.Disable();
+        }
+    }
+
+    public void AddMaxHealthBonus(int amount)
+    {
+        maxHealth += amount;
+        currentHealth = maxHealth;
+
+        if (healthBar != null)
+        {
+            healthBar.maxValue = maxHealth;
+        }
+
+        UpdateHealthBar();
+    }
+
+    public void AddMaxStaminaBonus(float amount)
+    {
+        maxStamina += amount;
+        currentStamina = maxStamina;
+
+        if (staminaBar != null)
+        {
+            staminaBar.maxValue = maxStamina;
+        }
+
+        UpdateStaminaBar();
+    }
+
     public void AddSouls(int amount)
     {
         if (audioSource != null && coinPickupClip != null)

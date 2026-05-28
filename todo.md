@@ -23,7 +23,7 @@
 - [ ] Level up system
 - [x] Basic enemies
 - [x] Block
-- [ ] Inventory
+- [x] Inventory
 - [x] Heal animation and block animation for player
 - [x] Cat merchant
 - [x] Background
