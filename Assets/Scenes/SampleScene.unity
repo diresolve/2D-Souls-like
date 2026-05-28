@@ -41786,7 +41786,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 351ae8dfd9e7f4e4e9c5022cafcad95d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInventory
-  capacity: 1
+  capacity: 5
   items: []
   inventoryUI: {fileID: 1842333244}
 --- !u!4 &1866801818 stripped
