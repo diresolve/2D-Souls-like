@@ -25,6 +25,7 @@ public class BonfireUI : MonoBehaviour
     [Header("Other")]
     [SerializeField] private TextMeshProUGUI soulBalanceText;
     [SerializeField] private Button closeButton;
+    [SerializeField] private MusicController musicController;
 
     private PlayerStats currentStats;
     private PlayerController currentPlayerController;
@@ -44,6 +45,7 @@ public class BonfireUI : MonoBehaviour
         currentPlayerController = stats != null ? stats.GetComponent<PlayerController>() : null;
 
         if (currentPlayerController != null) currentPlayerController.SetCombatEnabled(false);
+        if (musicController != null) musicController.PlayBonfireMusic();
 
         if (panel != null) panel.SetActive(true);
         Refresh();
@@ -52,6 +54,7 @@ public class BonfireUI : MonoBehaviour
     public void Close()
     {
         if (currentPlayerController != null) currentPlayerController.SetCombatEnabled(true);
+        if (musicController != null) musicController.PlayBackgroundMusic();
 
         currentStats = null;
         currentPlayerController = null;
