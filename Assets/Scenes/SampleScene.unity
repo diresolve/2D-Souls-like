@@ -39945,6 +39945,12 @@ MonoBehaviour:
   LastDeathPosition: {x: 0, y: 0, z: 0}
   DroppedSoulsAmount: 0
   HasDroppedSouls: 0
+  HasPersistedPlayerState: 0
+  PersistedSouls: 0
+  PersistedHealthLevel: 0
+  PersistedStaminaLevel: 0
+  PersistedDamageLevel: 0
+  PersistedItems: []
 --- !u!4 &1243718770
 Transform:
   m_ObjectHideFlags: 0
@@ -42981,8 +42987,8 @@ GameObject:
   - component: {fileID: 1658125477}
   - component: {fileID: 1658125476}
   - component: {fileID: 1658125478}
-  - component: {fileID: 1658125480}
   - component: {fileID: 1658125479}
+  - component: {fileID: 1658125480}
   m_Layer: 0
   m_Name: Bonfire
   m_TagString: Untagged
@@ -43044,7 +43050,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.2, y: 0.29}
+  m_Size: {x: 0.64, y: 0.44}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
@@ -43127,7 +43133,7 @@ Animator:
   m_GameObject: {fileID: 1658125475}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 176f09411c30fd542995644b94cee3e9, type: 2}
+  m_Controller: {fileID: 9100000, guid: e8fc7526973eb7d479a33f6bc677735a, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
