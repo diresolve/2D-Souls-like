@@ -29,6 +29,8 @@ public class BossArenaTrigger : MonoBehaviour
     private Coroutine activeCameraRoutine;
     private MonoBehaviour activeCameraRoutineRunner;
 
+    private bool introPlayed = false;
+
     public bool HasTriggered { get { return hasTriggered; } }
     public bool IsDefeated { get { return defeated; } }
 
@@ -107,7 +109,19 @@ public class BossArenaTrigger : MonoBehaviour
         if (musicController != null) musicController.PlayBossMusic();
 
         ActivateBoss();
-        StartCameraRoutine(CinematicReveal(player));
+
+        if (!introPlayed)
+        {
+            introPlayed = true;
+            StartCameraRoutine(CinematicReveal(player));
+        }
+        else
+        {
+            if (player != null)
+            {
+                player.LockMovementForAttack(false);
+            }
+        }
     }
 
     private void StartCameraRoutine(IEnumerator routine)

@@ -41668,7 +41668,7 @@ Rigidbody2D:
     serializedVersion: 2
     m_Bits: 0
   m_Interpolate: 0
-  m_SleepingMode: 1
+  m_SleepingMode: 0
   m_CollisionDetection: 0
   m_Constraints: 4
 --- !u!95 &1378997895
@@ -41820,6 +41820,7 @@ MonoBehaviour:
   normalSlashSound: {fileID: 8300000, guid: cbdeb6ad3fc9cad47843338d63c010d2, type: 3}
   heavySlashSound: {fileID: 8300000, guid: 8d96e4390dc57ee44b355f33cb610b24, type: 3}
   heavyAttackSoundDelay: 0.3
+  virtualCamera: {fileID: 612258851}
 --- !u!82 &1378997899
 AudioSource:
   m_ObjectHideFlags: 0

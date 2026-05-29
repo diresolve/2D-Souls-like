@@ -83,6 +83,12 @@ public class BossController : MonoBehaviour, IDamageable
     private bool isFacingRight = false;
     private bool isEnraged = false;
 
+    private bool canMove = true;
+    private float lastHazardDamageTime = 0f;
+
+    [SerializeField] private CinemachineCamera virtualCamera;
+    private float originalZoom;
+
     private void Awake()
     {
         boss = GetComponent<Rigidbody2D>();
@@ -91,6 +97,11 @@ public class BossController : MonoBehaviour, IDamageable
 
     void Start()
     {
+        if (virtualCamera != null)
+        {
+            originalZoom = virtualCamera.Lens.OrthographicSize;
+        }
+
         currentHealth = maxHealth;
         ResetCombatState();
 
@@ -122,7 +133,9 @@ public class BossController : MonoBehaviour, IDamageable
 
     void Update()
     {
-       if (currentState == State.Dead)
+        if (!canMove) return;
+
+        if (currentState == State.Dead)
         {
             return;
         }
@@ -650,6 +663,64 @@ public class BossController : MonoBehaviour, IDamageable
         {
             spriteRenderer.enabled = false;
         }
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        HandleHazard(collision.gameObject);
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        HandleHazard(collision.gameObject);
+    }
+
+    private void HandleHazard(GameObject hazardObj)
+    {
+        if (hazardObj.CompareTag("Hazard") && currentState != State.Dead)
+        {
+            if (Time.time >= lastHazardDamageTime + 1f)
+            {
+                lastHazardDamageTime = Time.time;
+
+                float knockbackDirX = transform.position.x < hazardObj.transform.position.x ? -1f : 1f;
+                TakeDamage(200, new Vector2(knockbackDirX, 0f));
+
+                StartCoroutine(BossHazardStun(knockbackDirX));
+            }
+        }
+    }
+
+    private IEnumerator BossHazardStun(float knockbackDirX)
+    {
+        canMove = false;
+        StopMoving();
+
+        if (virtualCamera != null)
+        {
+            LensSettings lens = virtualCamera.Lens;
+            lens.OrthographicSize = originalZoom + 4f;
+            virtualCamera.Lens = lens;
+        }
+
+        yield return new WaitForSeconds(6f);
+
+        if (boss != null)
+        {
+            boss.linearVelocity = Vector2.zero;
+            boss.AddForce(new Vector2(knockbackDirX * 15f * boss.mass, 5f * boss.mass), ForceMode2D.Impulse);
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        //if (virtualCamera != null)
+        //{
+        //    LensSettings lens = virtualCamera.Lens;
+        //    lens.OrthographicSize = originalZoom;
+        //    virtualCamera.Lens = lens;
+        //}
+
+        canMove = true;
     }
 }
 
