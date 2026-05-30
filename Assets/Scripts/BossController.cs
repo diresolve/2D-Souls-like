@@ -82,6 +82,7 @@ public class BossController : MonoBehaviour, IDamageable
     private float nextHeavyAttackTime = 0f;
     private bool isFacingRight = false;
     private bool isEnraged = false;
+    private bool isCurrentAttackHeavy = false;
 
     private bool canMove = true;
     private float lastHazardDamageTime = 0f;
@@ -342,6 +343,7 @@ public class BossController : MonoBehaviour, IDamageable
     private IEnumerator AttackRoutine(bool isHeavyAttack)
     {
         currentState = State.Attacking;
+        isCurrentAttackHeavy = isHeavyAttack;
         StopMoving();
         LookAtPlayer();
         DisableWeapon();
@@ -626,20 +628,26 @@ public class BossController : MonoBehaviour, IDamageable
         if (currentHealth <= 0)
         {
             Die();
+            return;
         }
-        else
+
+        if (currentState == State.Attacking && isCurrentAttackHeavy)
         {
-            if (attackRoutine != null)
-            {
-                StopCoroutine(attackRoutine);
-                attackRoutine = null;
-                DisableWeapon();
-                animator.speed = 1f;
-                nextAttackTime = Time.time + attackCooldown;
-                currentState = State.Chase;
-            }
-            animator.SetTrigger("Hurt");
+            return;
         }
+
+        if (attackRoutine != null)
+        {
+            StopCoroutine(attackRoutine);
+            attackRoutine = null;
+            DisableWeapon();
+            animator.speed = 1f;
+            animator.ResetTrigger("Attack");
+            animator.CrossFade("BossIdle", 0.05f);
+            nextAttackTime = Time.time + attackCooldown;
+            currentState = State.Chase;
+        }
+        animator.SetTrigger("Hurt");
 
     }
 
