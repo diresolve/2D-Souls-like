@@ -16,7 +16,7 @@
 - [x] Clipping into ground on steps
 - [x] Boss death animation should float up, not stay in place
 - [ ] Boss bugs
-- [ ] Implement slow time
+- [x] Implement slow time
 - [x] Reduce base stats
 - [x] HP and stamina bar should reflect upgrade lvl
 - [x] Reduce jump height

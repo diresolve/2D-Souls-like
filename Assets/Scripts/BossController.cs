@@ -31,6 +31,10 @@ public class BossController : MonoBehaviour, IDamageable
     [SerializeField] private GameObject soulPickupPrefab;
     [SerializeField] private int soulReward = 500;
 
+    [Header("Death Save Slow Motion")]
+    [SerializeField] private float deathSaveDuration = 5f;
+    [SerializeField, Range(0.05f, 1f)] private float deathSaveTimeScale = 0.25f;
+
     [Header("Heavy Attack")]
     [SerializeField] private int normalAttackDamage = 25;
     [SerializeField] private float heavyAttackDamageMultiplier = 1.5f;
@@ -83,6 +87,7 @@ public class BossController : MonoBehaviour, IDamageable
     private bool isFacingRight = false;
     private bool isEnraged = false;
     private bool isCurrentAttackHeavy = false;
+    private bool deathSaveTriggered = false;
 
     private bool canMove = true;
     private float lastHazardDamageTime = 0f;
@@ -134,6 +139,8 @@ public class BossController : MonoBehaviour, IDamageable
 
     void Update()
     {
+        if (audioSource != null) audioSource.pitch = Time.timeScale;
+
         if (!canMove) return;
 
         if (currentState == State.Dead)
@@ -352,6 +359,8 @@ public class BossController : MonoBehaviour, IDamageable
         int attackDamage = isHeavyAttack
             ? Mathf.RoundToInt(normalDamage * heavyAttackDamageMultiplier)
             : normalDamage;
+
+        TryTriggerDeathSave(attackDamage);
         float attackAnimationSpeed = isHeavyAttack ? Mathf.Max(heavyAttackAnimationSpeed, 0.01f) : 1f;
 
         SetBossWeaponDamage(attackDamage);
@@ -576,6 +585,21 @@ public class BossController : MonoBehaviour, IDamageable
 
         GetComponent<Collider2D>().enabled = false;
         StartCoroutine(FloatUpOnDeath());
+    }
+
+    private void TryTriggerDeathSave(int attackDamage)
+    {
+        if (deathSaveTriggered) return;
+        if (player == null || CameraManager.instance == null) return;
+
+        PlayerController playerController = player.GetComponent<PlayerController>();
+        if (playerController == null) return;
+
+        if (playerController.CurrentHealth > 0 && playerController.CurrentHealth <= attackDamage)
+        {
+            CameraManager.instance.TriggerSlowMotionFor(deathSaveDuration, deathSaveTimeScale);
+            deathSaveTriggered = true;
+        }
     }
 
     private void SpawnSoulPickup()

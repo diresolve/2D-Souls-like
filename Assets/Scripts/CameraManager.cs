@@ -181,6 +181,34 @@ public class CameraManager : MonoBehaviour
             : _normalOrthographicSize;
     }
 
+    private Coroutine timedSlowMotionRoutine;
+
+    public void TriggerSlowMotionFor(float realSeconds, float scale = -1f)
+    {
+        if (!_hasCapturedPlaytestDefaults)
+        {
+            CapturePlaytestDefaults();
+        }
+
+        if (timedSlowMotionRoutine != null) StopCoroutine(timedSlowMotionRoutine);
+        timedSlowMotionRoutine = StartCoroutine(TimedSlowMotionRoutine(realSeconds, scale));
+    }
+
+    private IEnumerator TimedSlowMotionRoutine(float realSeconds, float scale)
+    {
+        float targetScale = scale > 0f ? scale : playtestSlowMotionScale;
+
+        Time.timeScale = targetScale;
+        Time.fixedDeltaTime = _normalFixedDeltaTime * targetScale;
+
+        yield return new WaitForSecondsRealtime(realSeconds);
+
+        Time.timeScale = 1f;
+        Time.fixedDeltaTime = _normalFixedDeltaTime;
+        _isPlaytestSlowMotion = false;
+        timedSlowMotionRoutine = null;
+    }
+
     private void TogglePlaytestSlowMotion()
     {
         if (!_hasCapturedPlaytestDefaults)

@@ -1280,6 +1280,7 @@ public class PlayerController : MonoBehaviour
     }
 
     public int CurrentSouls => currentSouls;
+    public int CurrentHealth => currentHealth;
     public int MaxHealth => maxHealth;
     public float MaxStamina => maxStamina;
     public UnityEngine.UI.Slider HealthBar => healthBar;
