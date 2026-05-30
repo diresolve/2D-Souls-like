@@ -20,13 +20,13 @@
 - [x] Reduce base stats
 - [x] HP and stamina bar should reflect upgrade lvl
 - [x] Reduce jump height
-- [ ] Better bonfire menu
+- [x] Better bonfire menu
 
 ## Add Later
 
 - [x] Checkpoint animation
 - [x] Coin count on screen
-- [ ] Level up system
+- [x] Level up system
 - [x] Basic enemies
 - [x] Block
 - [x] Inventory
