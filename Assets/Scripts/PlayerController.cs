@@ -1507,4 +1507,13 @@ public class PlayerController : MonoBehaviour
     public bool IsGrounded { get { return isGrounded; } }
     public float UpwardBounceForce { get { return upwardBounceForce; } }
 
+    public void SetMovementLocked(bool locked)
+    {
+        canMove = !locked;
+        if (locked && rb2D != null)
+        {
+            rb2D.linearVelocity = new Vector2(0f, rb2D.linearVelocity.y);
+        }
+    }
+
 }
