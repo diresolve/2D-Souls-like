@@ -84,6 +84,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float staminaRegenDelay = 1f;
 
     [SerializeField] private float dashStaminaCost = 25f;
+    [SerializeField] private float jumpStaminaCost = 10f;
 
     [SerializeField] private float currentStamina;
     [SerializeField] private float lastStaminaUse;
@@ -300,7 +301,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // to do: moze skocit s enemyja samo ako drugi put skace
-        if (WasActionPressedThisFrame(jumpAction) /*&& isGrounded*/ && !isDashing && jumpsRemaining > 0)
+        if (WasActionPressedThisFrame(jumpAction) /*&& isGrounded*/ && !isDashing && jumpsRemaining > 0 && canConsumeStamina(jumpStaminaCost))
         {
             jumpRequested = true;
             if (audioSource != null && jumpClip != null) audioSource.PlayOneShot(jumpClip);
