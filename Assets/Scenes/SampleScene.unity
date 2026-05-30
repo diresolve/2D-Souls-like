@@ -12193,6 +12193,9 @@ MonoBehaviour:
   soulBalanceText: {fileID: 271462282}
   closeButton: {fileID: 1571377377}
   musicController: {fileID: 442521069}
+  levelUpVfxPrefab: {fileID: 754135688450712898, guid: 7240c7d48e54260419d06d177a622f72, type: 3}
+  levelUpVfxLifetime: 2
+  levelUpVfxOffset: {x: 0, y: 1, z: 0}
 --- !u!114 &814250479
 MonoBehaviour:
   m_ObjectHideFlags: 0

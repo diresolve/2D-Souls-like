@@ -27,6 +27,13 @@ public class BonfireUI : MonoBehaviour
     [SerializeField] private Button closeButton;
     [SerializeField] private MusicController musicController;
 
+    [Header("Level Up VFX")]
+    [SerializeField] private GameObject levelUpVfxPrefab;
+    [SerializeField] private float levelUpVfxLifetime = 2f;
+    [SerializeField] private Vector3 levelUpVfxOffset = Vector3.zero;
+
+    private bool didLevelUpThisSession;
+
     private PlayerStats currentStats;
     private PlayerController currentPlayerController;
 
@@ -43,6 +50,7 @@ public class BonfireUI : MonoBehaviour
     {
         currentStats = stats;
         currentPlayerController = stats != null ? stats.GetComponent<PlayerController>() : null;
+        didLevelUpThisSession = false;
 
         if (currentPlayerController != null) currentPlayerController.SetCombatEnabled(false);
         if (musicController != null) musicController.PlayBonfireMusic();
@@ -56,6 +64,14 @@ public class BonfireUI : MonoBehaviour
         if (currentPlayerController != null) currentPlayerController.SetCombatEnabled(true);
         if (musicController != null) musicController.PlayBackgroundMusic();
 
+        if (didLevelUpThisSession && levelUpVfxPrefab != null && currentPlayerController != null)
+        {
+            Vector3 spawnPos = currentPlayerController.transform.position + levelUpVfxOffset;
+            GameObject vfx = Instantiate(levelUpVfxPrefab, spawnPos, Quaternion.identity);
+            if (levelUpVfxLifetime > 0f) Destroy(vfx, levelUpVfxLifetime);
+        }
+
+        didLevelUpThisSession = false;
         currentStats = null;
         currentPlayerController = null;
         if (panel != null) panel.SetActive(false);
@@ -94,16 +110,28 @@ public class BonfireUI : MonoBehaviour
 
     private void OnHealthClicked()
     {
-        if (currentStats != null && currentStats.TryLevelUpHealth()) Refresh();
+        if (currentStats != null && currentStats.TryLevelUpHealth())
+        {
+            didLevelUpThisSession = true;
+            Refresh();
+        }
     }
 
     private void OnStaminaClicked()
     {
-        if (currentStats != null && currentStats.TryLevelUpStamina()) Refresh();
+        if (currentStats != null && currentStats.TryLevelUpStamina())
+        {
+            didLevelUpThisSession = true;
+            Refresh();
+        }
     }
 
     private void OnDamageClicked()
     {
-        if (currentStats != null && currentStats.TryLevelUpDamage()) Refresh();
+        if (currentStats != null && currentStats.TryLevelUpDamage())
+        {
+            didLevelUpThisSession = true;
+            Refresh();
+        }
     }
 }
