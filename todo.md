@@ -15,6 +15,12 @@
 - [x] Health bar should be empty when health is empty
 - [x] Clipping into ground on steps
 - [x] Boss death animation should float up, not stay in place
+- [ ] Boss bugs
+- [ ] Implement slow time
+- [ ] Reduce base stats
+- [ ] HP and stamina bar should reflect upgrade lvl
+- [x] Reduce jump height
+- [ ] Better bonfire menu
 
 ## Add Later
 

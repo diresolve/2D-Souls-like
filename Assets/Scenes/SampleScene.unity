@@ -44386,7 +44386,7 @@ MonoBehaviour:
   healActionName: Heal
   blockActionName: Block
   maxMoveSpeed: 8
-  jumpForce: 30
+  jumpForce: 25
   acceleration: 50
   deceleration: 40
   feetCollider: {fileID: 1866114890}
