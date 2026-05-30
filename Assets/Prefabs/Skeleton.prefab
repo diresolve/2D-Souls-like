@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8578843363341401664}
   - component: {fileID: 3942276111307278959}
   - component: {fileID: 8532810704891864354}
+  - component: {fileID: 6980915129219189519}
   m_Layer: 6
   m_Name: Skeleton
   m_TagString: Enemy
@@ -237,6 +238,19 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &6980915129219189519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2268910816493076290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ad0f2b91e70a8548b5f52921d3f08f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyWeaponDamage
+  damage: 40
 --- !u!1 &5914514991548790897
 GameObject:
   m_ObjectHideFlags: 0

@@ -44435,6 +44435,7 @@ MonoBehaviour:
   staminaRegenDelay: 1
   dashStaminaCost: 25
   jumpStaminaCost: 30
+  parryStaminaCost: 15
   currentStamina: 0
   lastStaminaUse: 0
   coinCount: {fileID: 843574336}

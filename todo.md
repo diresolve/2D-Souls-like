@@ -17,7 +17,7 @@
 - [x] Boss death animation should float up, not stay in place
 - [ ] Boss bugs
 - [ ] Implement slow time
-- [ ] Reduce base stats
+- [x] Reduce base stats
 - [x] HP and stamina bar should reflect upgrade lvl
 - [x] Reduce jump height
 - [ ] Better bonfire menu

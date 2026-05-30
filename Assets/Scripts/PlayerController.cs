@@ -85,6 +85,8 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private float dashStaminaCost = 25f;
     [SerializeField] private float jumpStaminaCost = 10f;
+    [SerializeField] private float parryStaminaCost = 25f;
+    [SerializeField] private float attackStaminaCost = 15f;
 
     [SerializeField] private float currentStamina;
     [SerializeField] private float lastStaminaUse;
@@ -582,7 +584,7 @@ public class PlayerController : MonoBehaviour
         }
 
         bool canStartOrContinueAttack = canMove || combatScript.isAttacking;
-        if (!canStartOrContinueAttack || !canConsumeStamina(15f))
+        if (!canStartOrContinueAttack || !canConsumeStamina(attackStaminaCost))
         {
             return;
         }
@@ -1067,7 +1069,7 @@ public class PlayerController : MonoBehaviour
             {
                 if (audioSource != null && parryClip != null) audioSource.PlayOneShot(parryClip);
 
-                if (canConsumeStamina(25f))
+                if (canConsumeStamina(parryStaminaCost))
                 {
 
                     float facingDirectionX = isFacingRight ? 1f : -1f;
@@ -1099,12 +1101,16 @@ public class PlayerController : MonoBehaviour
 
             canMove = false;
             isInvulnerable = true;
-            int enemySwordDamage = 25;
+            int enemySwordDamage = 0;
             BossWeaponDamage weaponDamage = collision.GetComponent<BossWeaponDamage>();
             if (weaponDamage != null)
             {
                 enemySwordDamage = weaponDamage.Damage;
-
+            }
+            else
+            {
+                EnemyWeaponDamage contactDamage = collision.GetComponentInParent<EnemyWeaponDamage>();
+                if (contactDamage != null) enemySwordDamage = contactDamage.Damage;
             }
 
             TakeDamage(enemySwordDamage, weaponDamage != null);
