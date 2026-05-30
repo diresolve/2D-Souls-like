@@ -18,6 +18,8 @@ public class GameManager : MonoBehaviour
     public int PersistedDamageLevel;
     public List<ItemData> PersistedItems = new List<ItemData>();
 
+    public bool IntroPlayed = false;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
