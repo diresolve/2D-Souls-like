@@ -1274,6 +1274,10 @@ public class PlayerController : MonoBehaviour
     }
 
     public int CurrentSouls => currentSouls;
+    public int MaxHealth => maxHealth;
+    public float MaxStamina => maxStamina;
+    public UnityEngine.UI.Slider HealthBar => healthBar;
+    public UnityEngine.UI.Slider StaminaBar => staminaBar;
 
     public void SetCombatEnabled(bool enabled)
     {

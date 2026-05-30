@@ -18,7 +18,7 @@
 - [ ] Boss bugs
 - [ ] Implement slow time
 - [ ] Reduce base stats
-- [ ] HP and stamina bar should reflect upgrade lvl
+- [x] HP and stamina bar should reflect upgrade lvl
 - [x] Reduce jump height
 - [ ] Better bonfire menu
 

@@ -21,6 +21,11 @@ public class PlayerStats : MonoBehaviour
     private int staminaLevel = 0;
     private int damageLevel = 0;
 
+    private int baseMaxHealth;
+    private float baseMaxStamina;
+    private float originalHealthBarWidth;
+    private float originalStaminaBarWidth;
+
     public int HealthLevel => healthLevel;
     public int StaminaLevel => staminaLevel;
     public int DamageLevel => damageLevel;
@@ -30,37 +35,105 @@ public class PlayerStats : MonoBehaviour
     {
         if (playerController == null) playerController = GetComponent<PlayerController>();
         if (playerCombat == null) playerCombat = GetComponent<PlayerCombat>();
+
+        if (playerController != null)
+        {
+            baseMaxHealth = playerController.MaxHealth;
+            baseMaxStamina = playerController.MaxStamina;
+        }
     }
 
     private IEnumerator Start()
     {
         yield return null;
 
-        if (GameManager.Instance == null || !GameManager.Instance.HasPersistedPlayerState) yield break;
+        CacheOriginalBarWidths();
 
-        int h = GameManager.Instance.PersistedHealthLevel;
-        int s = GameManager.Instance.PersistedStaminaLevel;
-        int d = GameManager.Instance.PersistedDamageLevel;
-
-        for (int i = 0; i < h; i++)
+        if (GameManager.Instance != null && GameManager.Instance.HasPersistedPlayerState)
         {
-            if (playerController != null) playerController.AddMaxHealthBonus(healthPerLevel);
-        }
-        healthLevel = h;
+            int h = GameManager.Instance.PersistedHealthLevel;
+            int s = GameManager.Instance.PersistedStaminaLevel;
+            int d = GameManager.Instance.PersistedDamageLevel;
 
-        for (int i = 0; i < s; i++)
+            for (int i = 0; i < h; i++)
+            {
+                if (playerController != null) playerController.AddMaxHealthBonus(healthPerLevel);
+            }
+            healthLevel = h;
+
+            for (int i = 0; i < s; i++)
+            {
+                if (playerController != null) playerController.AddMaxStaminaBonus(staminaPerLevel);
+            }
+            staminaLevel = s;
+
+            for (int i = 0; i < d; i++)
+            {
+                if (playerCombat != null) playerCombat.AddDamageBonus(damagePerLevel);
+            }
+            damageLevel = d;
+
+            GameManager.Instance.ClearPersistedPlayerState();
+        }
+
+        UpdateBarWidths();
+    }
+
+    private void CacheOriginalBarWidths()
+    {
+        if (playerController == null) return;
+
+        if (playerController.HealthBar != null)
         {
-            if (playerController != null) playerController.AddMaxStaminaBonus(staminaPerLevel);
+            RectTransform rt = playerController.HealthBar.GetComponent<RectTransform>();
+            if (rt != null) originalHealthBarWidth = rt.sizeDelta.x;
         }
-        staminaLevel = s;
 
-        for (int i = 0; i < d; i++)
+        if (playerController.StaminaBar != null)
         {
-            if (playerCombat != null) playerCombat.AddDamageBonus(damagePerLevel);
+            RectTransform rt = playerController.StaminaBar.GetComponent<RectTransform>();
+            if (rt != null) originalStaminaBarWidth = rt.sizeDelta.x;
         }
-        damageLevel = d;
+    }
 
-        GameManager.Instance.ClearPersistedPlayerState();
+    private void ResizeFromLeft(RectTransform rt, float newWidth)
+    {
+        if (rt == null) return;
+
+        float scaleX = rt.localScale.x;
+        float currentWidth = rt.sizeDelta.x;
+        float leftEdge = rt.anchoredPosition.x - rt.pivot.x * currentWidth * scaleX;
+
+        rt.sizeDelta = new Vector2(newWidth, rt.sizeDelta.y);
+        rt.anchoredPosition = new Vector2(leftEdge + rt.pivot.x * newWidth * scaleX, rt.anchoredPosition.y);
+    }
+
+    private void UpdateBarWidths()
+    {
+        if (playerController == null) return;
+
+        int absoluteMaxHealth = baseMaxHealth + (healthPerLevel * maxLevelPerStat);
+        float absoluteMaxStamina = baseMaxStamina + (staminaPerLevel * maxLevelPerStat);
+
+        if (playerController.HealthBar != null && absoluteMaxHealth > 0)
+        {
+            RectTransform rt = playerController.HealthBar.GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                float ratio = (float)playerController.MaxHealth / absoluteMaxHealth;
+                ResizeFromLeft(rt, originalHealthBarWidth * ratio);
+            }
+        }
+
+        if (playerController.StaminaBar != null && absoluteMaxStamina > 0f)
+        {
+            RectTransform rt = playerController.StaminaBar.GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                float ratio = playerController.MaxStamina / absoluteMaxStamina;
+                ResizeFromLeft(rt, originalStaminaBarWidth * ratio);
+            }
+        }
     }
 
     public int GetCostForNextLevel(int currentLevel)
@@ -82,6 +155,7 @@ public class PlayerStats : MonoBehaviour
         playerController.AddSouls(-cost);
         playerController.AddMaxHealthBonus(healthPerLevel);
         healthLevel++;
+        UpdateBarWidths();
         return true;
     }
 
@@ -92,6 +166,7 @@ public class PlayerStats : MonoBehaviour
         playerController.AddSouls(-cost);
         playerController.AddMaxStaminaBonus(staminaPerLevel);
         staminaLevel++;
+        UpdateBarWidths();
         return true;
     }
 
