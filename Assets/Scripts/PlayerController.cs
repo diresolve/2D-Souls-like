@@ -38,11 +38,8 @@ public class PlayerController : MonoBehaviour
 
     [Header("Mechanics")]
     [SerializeField] private float terminalVelocity = -12f;
-    [SerializeField] private float swampSpeedMultiplier = 0.4f;
-    [SerializeField] private float swampJumpMultiplier = 0.5f;
     [SerializeField] private float healTime = 0.5f;
     [SerializeField] private Vector2 damageKnockback = new Vector2(5f, 5f);
-    [SerializeField] private float alteredGravityScale = 0.5f;
 
     [SerializeField] private float invulnerabilityTime = 1f;
     [SerializeField] private float upwardBounceForce = 15f;
@@ -55,7 +52,6 @@ public class PlayerController : MonoBehaviour
 
     [Header("Heal Visuals")]
     [SerializeField] private GameObject healObject;
-    [SerializeField] private Animator healAnimator;
 
     [Header("Animation")]
     [SerializeField] private Animator animator;
@@ -143,14 +139,11 @@ public class PlayerController : MonoBehaviour
     private int jumpsRemaining = 2;
 
     private bool canMove = true;
-    private float originalMaxSpeed;
 
     private bool isInvulnerable = false;
     private bool isDashInvulnerable = false;
 
     private int currentHealth;
-
-    private float originalJumpForce;
 
     private float originalGravityScale;
 
@@ -204,17 +197,13 @@ public class PlayerController : MonoBehaviour
         DisposeOwnedInputActions();
     }
 
-    private Vector3 startPosition;
-
     private void Start()
     {
         _gameOverScreen.SetActive(false);
         rb2D = gameObject.GetComponent<Rigidbody2D>();
         rb2D.sleepMode = RigidbodySleepMode2D.NeverSleep;
         InitializeAnimationReferences();
-        originalMaxSpeed = maxMoveSpeed;
         currentHealth = maxHealth;
-        startPosition = transform.position;
 
         inventory = GetComponent<PlayerInventory>();
 
@@ -244,7 +233,6 @@ public class PlayerController : MonoBehaviour
             UpdateStaminaBar();
         }
 
-        originalJumpForce = jumpForce;
         originalGravityScale = rb2D.gravityScale;
         if (wallLayer.value == 0)
         {
@@ -269,18 +257,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        bool isHoldingBlock = blockAction != null && blockAction.ReadValue<float>() > 0.1f;
-        combatScript.SetBlocking(isHoldingBlock, currentStamina > 0f);
-
-        if (combatScript.IsBlocking && canMove && isGrounded && !isDashing)
-        {
-            currentStamina -= 10f * Time.deltaTime;
-            lastStaminaUse = Time.time;
-            UpdateStaminaBar();
-
-            moveHorizontal *= 0.5f;
-        }
-
+        UpdateBlocking();
         HandleStaminaRegen();
         ReadMoveInput();
         UpdateAnimationState();
@@ -302,17 +279,11 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // to do: moze skocit s enemyja samo ako drugi put skace
-        if (WasActionPressedThisFrame(jumpAction) /*&& isGrounded*/ && !isDashing && jumpsRemaining > 0 && canConsumeStamina(jumpStaminaCost))
+        if (WasActionPressedThisFrame(jumpAction) && !isDashing && jumpsRemaining > 0 && canConsumeStamina(jumpStaminaCost))
         {
             jumpRequested = true;
             if (audioSource != null && jumpClip != null) audioSource.PlayOneShot(jumpClip);
         }
-
-        //if (WasActionPressedThisFrame(healAction))
-        //{
-        //    StartCoroutine(UseHealingFlask());
-        //}
 
         if (WasActionPressedThisFrame(healAction) && currentHealth < maxHealth)
         {
@@ -368,17 +339,14 @@ public class PlayerController : MonoBehaviour
             isGrounded = feetCollider.IsTouchingLayers(groundLayer);
         }
         UpdateWallSlideState();
-        // pokusaj fixanja
 
         bool isTouchingWallAhead = false;
-        //float pushCheckDistance = 0.05f;
         float pushCheckDistance = 0.02f;
 
         Vector2 checkDir = new Vector2(moveHorizontal > 0 ? 1 : -1, 0);
         LayerMask solidObstacle = enemyLayer | wallLayer;
 
         Collider2D playerCollider = bodyCollider;
-        //Vector2 boxCastSize = new Vector2(playerCollider.bounds.size.x * 0.9f, playerCollider.bounds.size.y * 0.8f);
         Vector2 boxCastSize = new Vector2(playerCollider.bounds.size.x * 0.9f, playerCollider.bounds.size.y * 0.8f);
 
         RaycastHit2D hit = Physics2D.BoxCast(
@@ -406,23 +374,16 @@ public class PlayerController : MonoBehaviour
         float targetSpeed = moveHorizontal * maxMoveSpeed;
         float currentSpeed = rb2D.linearVelocity.x;
 
-        // ovo se isto dodalo
         if (isTouchingWallAhead)
         {
             targetSpeed = 0f;
             currentSpeed = 0f;
         }
 
-        
-
- 
         float accelRate = (Mathf.Abs(targetSpeed) > 0.01f) ? acceleration : deceleration;
-
-    
         float newSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, accelRate * Time.fixedDeltaTime);
 
         rb2D.linearVelocity = new Vector2(newSpeed, rb2D.linearVelocity.y);
- 
 
         if (jumpRequested)
         {
@@ -945,27 +906,6 @@ public class PlayerController : MonoBehaviour
         return false;
     }
 
-    //private IEnumerator UseHealingFlask()
-    //{
-    //    if (!canMove) yield break;
-    //    canMove = false;
-    //    rb2D.linearVelocity = new Vector2(0f, rb2D.linearVelocity.y);
-    //    if (healObject != null)
-    //    {
-    //        healObject.SetActive(true);
-    //    }
-    //    //if (healAnimator != null)
-    //    //{
-    //    //    healAnimator.SetTrigger("Heal");
-    //    //}
-    //    yield return new WaitForSeconds(healTime);
-    //    if (healObject != null)
-    //    {
-    //        healObject.SetActive(false);
-    //    }
-    //    canMove = true;
-    //}
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
         HandleHazardCollision(collision);
@@ -1041,121 +981,99 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Swamp"))
-        {
-            maxMoveSpeed = originalMaxSpeed * swampSpeedMultiplier;
-            jumpForce = originalJumpForce * swampJumpMultiplier;
-        }
-        else if (collision.gameObject.CompareTag("GravityZone"))
-        {
-            rb2D.gravityScale = alteredGravityScale;
-        }
-        else if (collision.gameObject.CompareTag("Interactable"))
+        if (collision.gameObject.CompareTag("Interactable"))
         {
             currentInteractableDoor = collision.GetComponent<HeavyDoor>();
         }
         else if (collision.gameObject.CompareTag("EnemySword") && !IsCurrentlyInvulnerable)
         {
-            if (isDashing)
-            {
-                isDashing = false;
-                rb2D.gravityScale = originalGravityScale;
-            }
-
-            Transform attackerTransform = collision.transform.parent != null ? collision.transform.parent : collision.transform;
-            float attackDirectionX = attackerTransform.position.x - transform.position.x;
-
-            if (combatScript.TryBlockAttack(attackDirectionX, isFacingRight))
-            {
-                if (audioSource != null && parryClip != null) audioSource.PlayOneShot(parryClip);
-
-                if (canConsumeStamina(parryStaminaCost))
-                {
-
-                    float facingDirectionX = isFacingRight ? 1f : -1f;
-
-                    bool isBossAttack = collision.GetComponent<BossWeaponDamage>() != null;
-
-                    if (isBossAttack)
-                    {
-                        rb2D.linearVelocity = Vector2.zero;
-                        rb2D.AddForce(new Vector2(damageKnockback.x * -facingDirectionX * 0.5f, 0f), ForceMode2D.Impulse);
-                    }
-                    else
-                    {
-                        Rigidbody2D enemyRb = collision.GetComponentInParent<Rigidbody2D>();
-                        if (enemyRb != null)
-                        {
-                            enemyRb.linearVelocity = Vector2.zero;
-                            enemyRb.AddForce(new Vector2(damageKnockback.x * facingDirectionX * 0.75f, 0f), ForceMode2D.Impulse);
-                        }
-                    }
-
-                    return;
-                }
-                else
-                {
-                    combatScript.SetBlocking(false, false);
-                }
-            }
-
-            canMove = false;
-            isInvulnerable = true;
-            int enemySwordDamage = 0;
-            BossWeaponDamage weaponDamage = collision.GetComponent<BossWeaponDamage>();
-            if (weaponDamage != null)
-            {
-                enemySwordDamage = weaponDamage.Damage;
-            }
-            else
-            {
-                EnemyWeaponDamage contactDamage = collision.GetComponentInParent<EnemyWeaponDamage>();
-                if (contactDamage != null) enemySwordDamage = contactDamage.Damage;
-            }
-
-            TakeDamage(enemySwordDamage, weaponDamage != null);
-            if (isDead) return;
-            rb2D.linearVelocity = Vector2.zero;
-            float knockbackDirection = transform.position.x < collision.transform.position.x ? -1f : 1f;
-            rb2D.AddForce(new Vector2(damageKnockback.x * knockbackDirection, damageKnockback.y), ForceMode2D.Impulse);
-
-            StartCoroutine(StunRecovery());
-            StartCoroutine(InvulnerabilityRoutine());
-            if (collision.gameObject.CompareTag("Swamp"))
-            {
-                maxMoveSpeed = originalMaxSpeed * swampSpeedMultiplier;
-                jumpForce = originalJumpForce * swampJumpMultiplier;
-            }
-            else if (collision.gameObject.CompareTag("GravityZone"))
-            {
-                rb2D.gravityScale = alteredGravityScale;
-            }
-            else if (collision.gameObject.CompareTag("Interactable"))
-            {
-                currentInteractableDoor = collision.GetComponent<HeavyDoor>();
-            }
-
+            HandleEnemySwordHit(collision);
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Swamp"))
-        {
-            maxMoveSpeed = originalMaxSpeed;
-            jumpForce = originalJumpForce;
-        }
-        else if (collision.gameObject.CompareTag("GravityZone"))
-        {
-            rb2D.gravityScale = originalGravityScale;
-        }
-        else if (collision.gameObject.CompareTag("Interactable"))
+        if (collision.gameObject.CompareTag("Interactable"))
         {
             if (currentInteractableDoor != null && currentInteractableDoor == collision.GetComponent<HeavyDoor>())
             {
                 currentInteractableDoor = null;
             }
         }
+    }
+
+    private void HandleEnemySwordHit(Collider2D collision)
+    {
+        if (isDashing)
+        {
+            isDashing = false;
+            rb2D.gravityScale = originalGravityScale;
+        }
+
+        Transform attackerTransform = collision.transform.parent != null ? collision.transform.parent : collision.transform;
+        float attackDirectionX = attackerTransform.position.x - transform.position.x;
+
+        if (TryParryAttack(collision, attackDirectionX))
+        {
+            return;
+        }
+
+        canMove = false;
+        isInvulnerable = true;
+
+        BossWeaponDamage weaponDamage = collision.GetComponent<BossWeaponDamage>();
+        int enemySwordDamage = 0;
+        if (weaponDamage != null)
+        {
+            enemySwordDamage = weaponDamage.Damage;
+        }
+        else
+        {
+            EnemyWeaponDamage contactDamage = collision.GetComponentInParent<EnemyWeaponDamage>();
+            if (contactDamage != null) enemySwordDamage = contactDamage.Damage;
+        }
+
+        TakeDamage(enemySwordDamage, weaponDamage != null);
+        if (isDead) return;
+
+        rb2D.linearVelocity = Vector2.zero;
+        float knockbackDirection = transform.position.x < collision.transform.position.x ? -1f : 1f;
+        rb2D.AddForce(new Vector2(damageKnockback.x * knockbackDirection, damageKnockback.y), ForceMode2D.Impulse);
+
+        StartCoroutine(StunRecovery());
+        StartCoroutine(InvulnerabilityRoutine());
+    }
+
+    private bool TryParryAttack(Collider2D collision, float attackDirectionX)
+    {
+        if (!combatScript.TryBlockAttack(attackDirectionX, isFacingRight)) return false;
+
+        if (audioSource != null && parryClip != null) audioSource.PlayOneShot(parryClip);
+
+        if (!canConsumeStamina(parryStaminaCost))
+        {
+            combatScript.SetBlocking(false, false);
+            return false;
+        }
+
+        float facingDirectionX = isFacingRight ? 1f : -1f;
+        bool isBossAttack = collision.GetComponent<BossWeaponDamage>() != null;
+
+        if (isBossAttack)
+        {
+            rb2D.linearVelocity = Vector2.zero;
+            rb2D.AddForce(new Vector2(damageKnockback.x * -facingDirectionX * 0.5f, 0f), ForceMode2D.Impulse);
+        }
+        else
+        {
+            Rigidbody2D enemyRb = collision.GetComponentInParent<Rigidbody2D>();
+            if (enemyRb != null)
+            {
+                enemyRb.linearVelocity = Vector2.zero;
+                enemyRb.AddForce(new Vector2(damageKnockback.x * facingDirectionX * 0.75f, 0f), ForceMode2D.Impulse);
+            }
+        }
+        return true;
     }
 
     private void TakeDamage(int damageAmount, bool isBoss = false)
@@ -1212,19 +1130,6 @@ public class PlayerController : MonoBehaviour
     private void Die(bool isBoss = false)
     {
         isDead = true;
-        //gameObject.SetActive(false);
-
-        //if (currentSouls > 0)
-        //{
-        //    lastDeathPosition = transform.position;
-        //    droppedSoulsAmount = currentSouls;
-        //    hasDroppedSouls = true;
-        //    currentSouls = 0;
-        //}
-        //else
-        //{
-        //    hasDroppedSouls = false;
-        //}
 
         if (currentSouls > 0)
         {
@@ -1241,9 +1146,6 @@ public class PlayerController : MonoBehaviour
                 GameManager.Instance.ClearDroppedSouls();
             }
         }
-
-        //_gameOverScreen.SetActive(true);
-        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 
         StartCoroutine(GameOverRoutine(isBoss));
     }
@@ -1383,9 +1285,6 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator Dash()
     {
-        //currentStamina -= dashStaminaCost;
-        //lastStaminaUse = Time.time;
-
         canDash = false;
         isDashing = true;
         lastDashStartedAt = Time.time;
@@ -1397,8 +1296,6 @@ public class PlayerController : MonoBehaviour
         float originalGravity = rb2D.gravityScale;
         rb2D.gravityScale = 0f;
 
-        //float dashDuration = isGrounded ? dashingTime : 0.05f;
-
         dashingDir = moveInput;
         if (dashingDir.sqrMagnitude < 0.01f)
         {
@@ -1409,7 +1306,6 @@ public class PlayerController : MonoBehaviour
 
         yield return new WaitForSeconds(dashingTime);
         rb2D.gravityScale = originalGravity;
-        //rb2D.linearVelocity = new Vector2(rb2D.linearVelocity.x * 0.8f, 0f);
         isDashing = false;
     }
 
@@ -1445,6 +1341,21 @@ public class PlayerController : MonoBehaviour
         }
 
         UpdateStaminaBar();
+    }
+
+    private void UpdateBlocking()
+    {
+        bool isHoldingBlock = blockAction != null && blockAction.ReadValue<float>() > 0.1f;
+        combatScript.SetBlocking(isHoldingBlock, currentStamina > 0f);
+
+        if (combatScript.IsBlocking && canMove && isGrounded && !isDashing)
+        {
+            currentStamina -= 10f * Time.deltaTime;
+            lastStaminaUse = Time.time;
+            UpdateStaminaBar();
+
+            moveHorizontal *= 0.5f;
+        }
     }
 
     public void LockMovementForAttack(bool isLocked)

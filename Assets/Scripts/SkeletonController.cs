@@ -153,11 +153,7 @@ public class SkeletonController : MonoBehaviour, IDamageable
 
     private void MoveTowardsPlayer()
     {
-        animator.SetFloat("Speed", moveSpeed);
-        float direction = Mathf.Sign(player.position.x - transform.position.x);
-        rb.linearVelocity = new Vector2(direction * moveSpeed, rb.linearVelocity.y);
-
-        HandleWalkSound();
+        MoveTowardsPoint(player.position);
     }
 
     private void StopMoving()
@@ -173,10 +169,7 @@ public class SkeletonController : MonoBehaviour, IDamageable
 
     private void LookAtPlayer()
     {
-        if (player.position.x > transform.position.x && !isFacingRight)
-            Flip();
-        else if (player.position.x < transform.position.x && isFacingRight)
-            Flip();
+        LookAtPoint(player.position);
     }
 
     private void LookAtPoint(Vector2 target)

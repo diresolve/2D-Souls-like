@@ -17,7 +17,6 @@ public class MerchantCat : MonoBehaviour
     [SerializeField] private Transform meowVfxAnchor;
     [SerializeField] private float meowVfxLifetime = 1f;
 
-    private bool playerInRange;
     private PlayerController playerInRangeRef;
 
     public ItemData itemToSell;
@@ -29,7 +28,7 @@ public class MerchantCat : MonoBehaviour
 
     private void Update()
     {
-        if (!playerInRange || playerInRangeRef == null) return;
+        if (playerInRangeRef == null) return;
         if (Keyboard.current == null) return;
 
         if (Keyboard.current[interactKey].wasPressedThisFrame)
@@ -45,7 +44,6 @@ public class MerchantCat : MonoBehaviour
         PlayerController player = other.GetComponent<PlayerController>();
         if (player == null) return;
 
-        playerInRange = true;
         playerInRangeRef = player;
 
         if (interactPrompt != null) interactPrompt.SetActive(true);
@@ -55,16 +53,10 @@ public class MerchantCat : MonoBehaviour
     {
         if (!other.CompareTag(playerTag)) return;
 
-        playerInRange = false;
         playerInRangeRef = null;
 
         if (interactPrompt != null) interactPrompt.SetActive(false);
     }
-
-    //private void Interact(PlayerController player)
-    //{
-    //    PlayMeow();
-    //}
 
     private void PlayMeow()
     {
@@ -104,7 +96,7 @@ public class MerchantCat : MonoBehaviour
             }
             else
             {
-                Debug.Log("Nemaš dovoljno duša!");
+                Debug.Log("Nemaï¿½ dovoljno duï¿½a!");
             }
         }
     }

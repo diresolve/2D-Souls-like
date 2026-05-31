@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections;
-using Unity.VisualScripting;
 using Unity.Cinemachine;
 
 public class BossController : MonoBehaviour, IDamageable
@@ -76,7 +75,6 @@ public class BossController : MonoBehaviour, IDamageable
     [SerializeField] private AudioClip heavySlashSound;
     [SerializeField] private float heavyAttackSoundDelay = 0.3f;
 
-    //private int currentHealth;
     private Rigidbody2D boss;
     private Collider2D bodyCollider;
     private Collider2D playerCollider;
@@ -371,11 +369,6 @@ public class BossController : MonoBehaviour, IDamageable
 
         if (audioSource != null)
         {
-            //AudioClip soundToPlay = isHeavyAttack ? heavySlashSound : normalSlashSound;
-            //if (soundToPlay != null)
-            //{
-            //    audioSource.PlayOneShot(soundToPlay);
-            //}
             if (isHeavyAttack && heavySlashSound != null)
             {
                 StartCoroutine(PlayDelayedSound(heavySlashSound, heavyAttackSoundDelay));
@@ -565,17 +558,7 @@ public class BossController : MonoBehaviour, IDamageable
             arenaTrigger.OnBossDefeated();
         }
 
-        //SpawnSoulPickup();
-        //if (spriteRenderer != null)
-        //{
-        //    spriteRenderer.color = Color.white;
-        //}
-        //if (healthBar != null)
-        //{
-        //    healthBar.gameObject.SetActive(false);
-        //}
         currentState = State.Dead;
-        //animator.speed = 1f;
         animator.speed = 1f / Mathf.Max(soundDuration, 0.1f) * deathAnimationSpeedMultiplier;
         animator.SetBool("Dead", true);
         boss.linearVelocity = Vector2.zero;
@@ -744,13 +727,6 @@ public class BossController : MonoBehaviour, IDamageable
         }
 
         yield return new WaitForSeconds(0.5f);
-
-        //if (virtualCamera != null)
-        //{
-        //    LensSettings lens = virtualCamera.Lens;
-        //    lens.OrthographicSize = originalZoom;
-        //    virtualCamera.Lens = lens;
-        //}
 
         canMove = true;
     }
