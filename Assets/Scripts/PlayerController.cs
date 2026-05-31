@@ -260,6 +260,11 @@ public class PlayerController : MonoBehaviour
         UpdateBlocking();
         HandleStaminaRegen();
         ReadMoveInput();
+
+        if (combatScript.IsBlocking && isGrounded && !isDashing)
+        {
+            moveHorizontal = 0f;
+        }
         UpdateAnimationState();
 
         if (TryStartDashAttack())
@@ -1353,8 +1358,6 @@ public class PlayerController : MonoBehaviour
             currentStamina -= 10f * Time.deltaTime;
             lastStaminaUse = Time.time;
             UpdateStaminaBar();
-
-            moveHorizontal *= 0.5f;
         }
     }
 

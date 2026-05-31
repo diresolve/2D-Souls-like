@@ -303,6 +303,7 @@ public class BossController : MonoBehaviour, IDamageable
 
     public void EnableWeapon()
     {
+        if (currentState != State.Attacking) return;
         if (bossWeapon != null)
         {
             bossWeapon.SetActive(true);

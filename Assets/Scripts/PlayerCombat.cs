@@ -240,9 +240,10 @@ public class PlayerCombat : MonoBehaviour
 
     private IEnumerator HitStop(float duration)
     {
+        float previousTimeScale = Time.timeScale;
         Time.timeScale = 0f;
         yield return new WaitForSecondsRealtime(duration);
-        Time.timeScale = 1f;
+        Time.timeScale = previousTimeScale;
     }
 
     private void OnDrawGizmosSelected()

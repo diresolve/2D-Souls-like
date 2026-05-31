@@ -241,6 +241,7 @@ public class SkeletonController : MonoBehaviour, IDamageable
 
     private IEnumerator DamageFlash()
     {
+        spriteRenderer.color = damageColor;
         yield return new WaitForSeconds(flashDuration);
         spriteRenderer.color = originalColor;
     }
