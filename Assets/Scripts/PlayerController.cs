@@ -1034,13 +1034,13 @@ public class PlayerController : MonoBehaviour
     {
         if (!combatScript.TryBlockAttack(attackDirectionX, isFacingRight)) return false;
 
-        if (audioSource != null && parryClip != null) audioSource.PlayOneShot(parryClip);
-
         if (!canConsumeStamina(parryStaminaCost))
         {
             combatScript.SetBlocking(false, false);
             return false;
         }
+
+        if (audioSource != null && parryClip != null) audioSource.PlayOneShot(parryClip);
 
         float facingDirectionX = isFacingRight ? 1f : -1f;
         bool isBossAttack = collision.GetComponent<BossWeaponDamage>() != null;
