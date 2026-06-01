@@ -118,13 +118,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip jumpClip;
     [SerializeField] private AudioClip dashClip;
     [SerializeField] private AudioClip parryClip;
-    [SerializeField] private float walkSoundInterval = 0.3f;
     [SerializeField] private AudioClip hurtClip;
     [SerializeField] private AudioClip coinPickupClip;
 
     [SerializeField] private AudioClip healClip;
-
-    private float walkTimer;
 
     private Rigidbody2D rb2D;
 
@@ -307,22 +304,6 @@ public class PlayerController : MonoBehaviour
                 StartCoroutine(Dash());
             }
             
-        }
-
-        if (isGrounded && Mathf.Abs(moveHorizontal) > 0.1f && !isDashing && canMove)
-        {
-            walkTimer -= Time.deltaTime;
-            if (walkTimer <= 0f)
-            {
-                if (audioSource != null && walkClip != null)
-                    audioSource.PlayOneShot(walkClip);
-
-                walkTimer = walkSoundInterval;
-            }
-        }
-        else
-        {
-            walkTimer = 0f;
         }
 
         TurnCheck();
@@ -1428,6 +1409,12 @@ public class PlayerController : MonoBehaviour
         {
             rb2D.linearVelocity = new Vector2(0f, rb2D.linearVelocity.y);
         }
+    }
+
+    public void PlayFootstep()
+    {
+        if (audioSource != null && walkClip != null)
+            audioSource.PlayOneShot(walkClip);
     }
 
 }

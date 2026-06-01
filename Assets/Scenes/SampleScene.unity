@@ -4629,6 +4629,7 @@ GameObject:
   - component: {fileID: 397775669}
   - component: {fileID: 397775672}
   - component: {fileID: 397775671}
+  - component: {fileID: 397775673}
   m_Layer: 7
   m_Name: Visual
   m_TagString: Untagged
@@ -4845,6 +4846,18 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &397775673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 397775667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11b057f8bbdc81a4fb9ebda8186e566a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimationEvents
 --- !u!1001 &404056725
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -37983,6 +37996,7 @@ GameObject:
   - component: {fileID: 1866114894}
   - component: {fileID: 1866114895}
   - component: {fileID: 1866114896}
+  - component: {fileID: 1866114897}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -38223,7 +38237,6 @@ MonoBehaviour:
   jumpClip: {fileID: 8300000, guid: 4e349dc959014a845b9aa317d1c2b7f0, type: 3}
   dashClip: {fileID: 8300000, guid: 8ff2a2d7e79f81c40ac447512f879374, type: 3}
   parryClip: {fileID: 8300000, guid: 0b5d5e554cd2d294f80c8e5a70a05a2b, type: 3}
-  walkSoundInterval: 0.3
   hurtClip: {fileID: 8300000, guid: 8b23b175a78d6b5458322e3a6c9905d0, type: 3}
   coinPickupClip: {fileID: 8300000, guid: 84e6373331dae4a42905ddc47f50f2f1, type: 3}
   healClip: {fileID: 8300000, guid: cfce0cea076109f478783201b2a9f57f, type: 3}
@@ -38559,6 +38572,18 @@ MonoBehaviour:
   damagePerLevel: 3
   playerController: {fileID: 0}
   playerCombat: {fileID: 0}
+--- !u!114 &1866114897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1866114884}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11b057f8bbdc81a4fb9ebda8186e566a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimationEvents
 --- !u!4 &1866801818 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4552379490772930529, guid: 6d2b33871b1876744835c6b2d1265108, type: 3}
