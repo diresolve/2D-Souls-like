@@ -1133,7 +1133,25 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        PersistPlayerState();
+
         StartCoroutine(GameOverRoutine(isBoss));
+    }
+
+    private void PersistPlayerState()
+    {
+        if (GameManager.Instance == null) return;
+
+        PlayerStats stats = GetComponent<PlayerStats>();
+        PlayerInventory inv = GetComponent<PlayerInventory>();
+
+        GameManager.Instance.SavePlayerState(
+            currentSouls,
+            stats != null ? stats.HealthLevel : 0,
+            stats != null ? stats.StaminaLevel : 0,
+            stats != null ? stats.DamageLevel : 0,
+            inv != null ? inv.items : null
+        );
     }
 
     private IEnumerator GameOverRoutine(bool isBoss)
@@ -1150,20 +1168,7 @@ public class PlayerController : MonoBehaviour
 
     public void TeleportToStart()
     {
-        if (GameManager.Instance != null)
-        {
-            PlayerStats stats = GetComponent<PlayerStats>();
-            PlayerInventory inv = GetComponent<PlayerInventory>();
-
-            GameManager.Instance.SavePlayerState(
-                currentSouls,
-                stats != null ? stats.HealthLevel : 0,
-                stats != null ? stats.StaminaLevel : 0,
-                stats != null ? stats.DamageLevel : 0,
-                inv != null ? inv.items : null
-            );
-        }
-
+        PersistPlayerState();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 

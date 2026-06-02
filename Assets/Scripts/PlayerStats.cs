@@ -55,22 +55,12 @@ public class PlayerStats : MonoBehaviour
             int s = GameManager.Instance.PersistedStaminaLevel;
             int d = GameManager.Instance.PersistedDamageLevel;
 
-            for (int i = 0; i < h; i++)
-            {
-                if (playerController != null) playerController.AddMaxHealthBonus(healthPerLevel);
-            }
+            if (playerController != null && h > 0) playerController.AddMaxHealthBonus(healthPerLevel * h);
+            if (playerController != null && s > 0) playerController.AddMaxStaminaBonus(staminaPerLevel * s);
+            if (playerCombat != null && d > 0) playerCombat.AddDamageBonus(damagePerLevel * d);
+
             healthLevel = h;
-
-            for (int i = 0; i < s; i++)
-            {
-                if (playerController != null) playerController.AddMaxStaminaBonus(staminaPerLevel);
-            }
             staminaLevel = s;
-
-            for (int i = 0; i < d; i++)
-            {
-                if (playerCombat != null) playerCombat.AddDamageBonus(damagePerLevel);
-            }
             damageLevel = d;
 
             GameManager.Instance.ClearPersistedPlayerState();
