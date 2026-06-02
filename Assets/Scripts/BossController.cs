@@ -410,7 +410,8 @@ public class BossController : MonoBehaviour, IDamageable
         attackRoutine = null;
         animator.speed = 1f;
         animator.ResetTrigger("Attack");
-        animator.CrossFade("BossIdle", 0.05f);
+        animator.ResetTrigger("Hurt");
+        animator.CrossFade("BossChase", 0.05f);
         SetBossWeaponDamage(GetCurrentNormalAttackDamage());
         nextAttackTime = Time.time + attackCooldown;
         if (wasHeavyAttack)
