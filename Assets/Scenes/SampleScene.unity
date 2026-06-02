@@ -38157,15 +38157,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   cameraFollowObject: {fileID: 1344441802}
-  inputActions: {fileID: 0}
-  playerActionMapName: Player
-  moveActionName: Move
-  jumpActionName: Jump
-  dashActionName: Sprint
-  attackActionName: Attack
-  interactActionName: Interact
-  healActionName: Heal
-  blockActionName: Block
   maxMoveSpeed: 8
   jumpForce: 25
   acceleration: 50
