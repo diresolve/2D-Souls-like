@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -9,17 +8,6 @@ using UnityEngine.SceneManagement;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private CameraFollowObject cameraFollowObject;
-
-    [Header("Input")]
-    [SerializeField] private InputActionAsset inputActions;
-    [SerializeField] private string playerActionMapName = "Player";
-    [SerializeField] private string moveActionName = "Move";
-    [SerializeField] private string jumpActionName = "Jump";
-    [SerializeField] private string dashActionName = "Sprint";
-    [SerializeField] private string attackActionName = "Attack";
-    [SerializeField] private string interactActionName = "Interact";
-    [SerializeField] private string healActionName = "Heal";
-    [SerializeField] private string blockActionName = "Block";
 
     [Header("Movement")]
     [SerializeField] private float maxMoveSpeed = 8f;
@@ -702,96 +690,32 @@ public class PlayerController : MonoBehaviour
 
     private void InitializeInputActions()
     {
-        InputActionMap playerActionMap = inputActions != null
-            ? inputActions.FindActionMap(playerActionMapName, false)
-            : null;
-
-        moveAction = FindInputAction(playerActionMap, moveActionName, CreateMoveAction);
-        jumpAction = FindInputAction(playerActionMap, jumpActionName, CreateJumpAction);
-        dashAction = FindInputAction(playerActionMap, dashActionName, CreateDashAction);
-        attackAction = FindInputAction(playerActionMap, attackActionName, CreateAttackAction);
-        interactAction = FindInputAction(playerActionMap, interactActionName, CreateInteractAction);
-        healAction = FindInputAction(playerActionMap, healActionName, CreateHealAction);
-        blockAction = FindInputAction(playerActionMap, blockActionName, CreateBlockAction);
-    }
-
-    private InputAction CreateBlockAction()
-    {
-        return CreateButtonAction(blockActionName, "<Mouse>/rightButton", "<Keyboard>/leftAlt", "<Gamepad>/rightShoulder");
-    }
-
-    private InputAction FindInputAction(InputActionMap actionMap, string actionName, Func<InputAction> fallbackFactory)
-    {
-        if (actionMap != null && !string.IsNullOrWhiteSpace(actionName))
-        {
-            InputAction action = actionMap.FindAction(actionName, false);
-            if (action != null)
-            {
-                return action;
-            }
-        }
-
-        InputAction fallbackAction = fallbackFactory();
-        ownedInputActions.Add(fallbackAction);
-        return fallbackAction;
-    }
-
-    private InputAction CreateMoveAction()
-    {
-        InputAction action = new InputAction(moveActionName, InputActionType.Value, expectedControlType: "Vector2");
-
-        action.AddCompositeBinding("2DVector")
+        InputAction move = new InputAction("Move", InputActionType.Value, expectedControlType: "Vector2");
+        move.AddCompositeBinding("2DVector")
             .With("Up", "<Keyboard>/w")
             .With("Down", "<Keyboard>/s")
             .With("Left", "<Keyboard>/a")
             .With("Right", "<Keyboard>/d");
+        moveAction = RegisterOwnedAction(move);
 
-        action.AddCompositeBinding("2DVector")
-            .With("Up", "<Keyboard>/upArrow")
-            .With("Down", "<Keyboard>/downArrow")
-            .With("Left", "<Keyboard>/leftArrow")
-            .With("Right", "<Keyboard>/rightArrow");
+        jumpAction = RegisterOwnedAction(CreateButtonAction("Jump", "<Keyboard>/space"));
+        dashAction = RegisterOwnedAction(CreateButtonAction("Dash", "<Keyboard>/leftShift"));
+        attackAction = RegisterOwnedAction(CreateButtonAction("Attack", "<Mouse>/leftButton"));
+        blockAction = RegisterOwnedAction(CreateButtonAction("Block", "<Mouse>/rightButton"));
+        interactAction = RegisterOwnedAction(CreateButtonAction("Interact", "<Keyboard>/e"));
+        healAction = RegisterOwnedAction(CreateButtonAction("Heal", "<Keyboard>/h"));
+    }
 
-        action.AddBinding("<Gamepad>/leftStick");
-        action.AddBinding("<Gamepad>/dpad");
-
+    private InputAction RegisterOwnedAction(InputAction action)
+    {
+        ownedInputActions.Add(action);
         return action;
     }
 
-    private InputAction CreateJumpAction()
-    {
-        return CreateButtonAction(jumpActionName, "<Keyboard>/space", "<Gamepad>/buttonSouth");
-    }
-
-    private InputAction CreateDashAction()
-    {
-        return CreateButtonAction(dashActionName, "<Keyboard>/leftShift", "<Gamepad>/leftStickPress", "<Gamepad>/rightShoulder");
-    }
-
-    private InputAction CreateAttackAction()
-    {
-        return CreateButtonAction(attackActionName, "<Mouse>/leftButton", "<Keyboard>/leftCtrl", "<Gamepad>/buttonWest");
-    }
-
-    private InputAction CreateInteractAction()
-    {
-        return CreateButtonAction(interactActionName, "<Keyboard>/e", "<Gamepad>/buttonNorth");
-    }
-
-    private InputAction CreateHealAction()
-    {
-        return CreateButtonAction(healActionName, "<Keyboard>/h", "<Gamepad>/selectButton");
-    }
-
-    private InputAction CreateButtonAction(string actionName, params string[] bindings)
+    private InputAction CreateButtonAction(string actionName, string binding)
     {
         InputAction action = new InputAction(actionName, InputActionType.Button);
-
-        foreach (string binding in bindings)
-        {
-            action.AddBinding(binding);
-        }
-
+        action.AddBinding(binding);
         return action;
     }
 
