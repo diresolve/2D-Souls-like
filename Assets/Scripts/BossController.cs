@@ -520,8 +520,6 @@ public class BossController : MonoBehaviour, IDamageable
         heavyAttackImpulseSource.ImpulseDefinition.ImpulseShape = CinemachineImpulseDefinition.ImpulseShapes.Bump;
         heavyAttackImpulseSource.ImpulseDefinition.ImpulseDuration = Mathf.Max(0.01f, heavyAttackShakeDuration);
         heavyAttackImpulseSource.ImpulseDefinition.ImpulseType = CinemachineImpulseDefinition.ImpulseTypes.Uniform;
-        heavyAttackImpulseSource.ImpulseDefinition.DissipationDistance = 100f;
-        heavyAttackImpulseSource.ImpulseDefinition.DissipationRate = 0.25f;
         heavyAttackImpulseSource.DefaultVelocity = Vector3.down;
     }
 
