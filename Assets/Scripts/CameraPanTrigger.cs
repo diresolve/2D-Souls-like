@@ -51,7 +51,7 @@ public class CameraPanTrigger : MonoBehaviour
             _player = collision.GetComponent<PlayerController>();
             if (_player != null)
             {
-                _player.LockMovementForAttack(true);
+                _player.SetMovementLocked(true);
             }
 
             if (_audioSource != null && _triggerSound != null)
@@ -99,7 +99,7 @@ public class CameraPanTrigger : MonoBehaviour
 
         if (_player != null)
         {
-            _player.LockMovementForAttack(false);
+            _player.SetMovementLocked(false);
         }
     }
 

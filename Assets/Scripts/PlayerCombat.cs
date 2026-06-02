@@ -95,14 +95,14 @@ public class PlayerCombat : MonoBehaviour
 
         if (player != null && player.IsGrounded)
         {
-            player.LockMovementForAttack(true);
+            player.SetMovementLocked(true);
         }
 
         yield return new WaitForSeconds(blockDuration);
 
         if (player != null)
         {
-            player.LockMovementForAttack(false);
+            player.SetMovementLocked(false);
         }
 
         IsBlocking = false;
@@ -158,7 +158,7 @@ public class PlayerCombat : MonoBehaviour
 
         if (player != null && player.IsGrounded)
         {
-            player.LockMovementForAttack(true);
+            player.SetMovementLocked(true);
         }
 
         yield return new WaitForSeconds(attackStartupTime);
@@ -196,7 +196,7 @@ public class PlayerCombat : MonoBehaviour
 
         if (player != null)
         {
-            player.LockMovementForAttack(false);
+            player.SetMovementLocked(false);
         }
         isAttacking = false;
     }

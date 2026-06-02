@@ -119,7 +119,7 @@ public class BossArenaTrigger : MonoBehaviour
         {
             if (player != null)
             {
-                player.LockMovementForAttack(false);
+                player.SetMovementLocked(false);
             }
         }
     }
@@ -200,7 +200,7 @@ public class BossArenaTrigger : MonoBehaviour
     {
         if (player != null)
         {
-            player.LockMovementForAttack(true);
+            player.SetMovementLocked(true);
         }
 
         Transform originalTarget = virtualCamera != null ? virtualCamera.Target.TrackingTarget : null;
@@ -235,7 +235,7 @@ public class BossArenaTrigger : MonoBehaviour
 
         if (player != null)
         {
-            player.LockMovementForAttack(false);
+            player.SetMovementLocked(false);
         }
 
         ActivateBoss();

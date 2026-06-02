@@ -137,7 +137,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] GameObject _gameOverScreen;
 
     private PlayerCombat combatScript;
-    private List<InputAction> enabledInputActions = new List<InputAction>();
     private List<InputAction> ownedInputActions = new List<InputAction>();
     private InputAction moveAction;
     private InputAction jumpAction;
@@ -192,31 +191,12 @@ public class PlayerController : MonoBehaviour
 
         inventory = GetComponent<PlayerInventory>();
 
-        if (healthBar != null)
-        {
-            healthBar.minValue = 0f;
-            healthBar.maxValue = maxHealth;
-            healthBar.interactable = false;
-            if (healthBar.handleRect != null)
-            {
-                healthBar.handleRect.gameObject.SetActive(false);
-            }
-            UpdateHealthBar();
-        }
+        InitializeBar(healthBar, maxHealth);
+        UpdateHealthBar();
 
         currentStamina = maxStamina;
-
-        if (staminaBar != null)
-        {
-            staminaBar.minValue = 0f;
-            staminaBar.maxValue = maxStamina;
-            staminaBar.interactable = false;
-            if (staminaBar.handleRect != null)
-            {
-                staminaBar.handleRect.gameObject.SetActive(false);
-            }
-            UpdateStaminaBar();
-        }
+        InitializeBar(staminaBar, maxStamina);
+        UpdateStaminaBar();
 
         originalGravityScale = rb2D.gravityScale;
         if (wallLayer.value == 0)
@@ -244,7 +224,9 @@ public class PlayerController : MonoBehaviour
 
         UpdateBlocking();
         HandleStaminaRegen();
-        ReadMoveInput();
+
+        moveInput = moveAction.ReadValue<Vector2>();
+        moveHorizontal = moveInput.x;
 
         if (combatScript.IsBlocking && isGrounded && !isDashing)
         {
@@ -269,34 +251,29 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (WasActionPressedThisFrame(jumpAction) && !isDashing && jumpsRemaining > 0 && canConsumeStamina(jumpStaminaCost))
+        if (jumpAction.WasPressedThisFrame() && !isDashing && jumpsRemaining > 0 && canConsumeStamina(jumpStaminaCost))
         {
             jumpRequested = true;
-            if (audioSource != null && jumpClip != null) audioSource.PlayOneShot(jumpClip);
+            PlayClip(jumpClip);
         }
 
-        if (WasActionPressedThisFrame(healAction) && currentHealth < maxHealth)
+        if (healAction.WasPressedThisFrame() && currentHealth < maxHealth)
         {
             inventory.ConsumeFirstHealthPotion();
         }
 
-        if (WasActionPressedThisFrame(interactAction) && currentInteractableDoor != null)
+        if (interactAction.WasPressedThisFrame() && currentInteractableDoor != null)
         {
             StartCoroutine(PerformInteraction());
         }
 
-        if (WasActionPressedThisFrame(dashAction) && canDash && currentStamina > 0f)
+        if (dashAction.WasPressedThisFrame() && canDash && canConsumeStamina(dashStaminaCost))
         {
-            if (canConsumeStamina(dashStaminaCost))
-            {
-                StartCoroutine(Dash());
-            }
-            
+            StartCoroutine(Dash());
         }
 
         TurnCheck();
         UpdateAnimationState();
-
     }
 
     private void FixedUpdate()
@@ -388,11 +365,7 @@ public class PlayerController : MonoBehaviour
 
     private void TurnCheck()
     {
-        if (moveHorizontal > 0 && !isFacingRight)
-        {
-            Turn();
-        }
-        else if (moveHorizontal < 0 && isFacingRight)
+        if ((moveHorizontal > 0 && !isFacingRight) || (moveHorizontal < 0 && isFacingRight))
         {
             Turn();
         }
@@ -415,21 +388,19 @@ public class PlayerController : MonoBehaviour
     private void CameraYDampingCheck()
     {
         if (rb2D == null || CameraManager.instance == null) return;
+        CameraManager cam = CameraManager.instance;
+        if (cam.IsLerpingYDamping) return;
 
-        if (rb2D.linearVelocity.y < CameraManager.instance.FallSpeedYDampingChangeThreshold && !CameraManager.instance.LerpedFromPlayerFalling && !CameraManager.instance.IsLerpingYDamping)
-        {
-            CameraManager.instance.LerpYDamping(true);
-        }
-
-        if (rb2D.linearVelocity.y >= 0f && CameraManager.instance.LerpedFromPlayerFalling && !CameraManager.instance.IsLerpingYDamping)
-        {
-            CameraManager.instance.LerpYDamping(false);
-        }
+        float vy = rb2D.linearVelocity.y;
+        if (vy < cam.FallSpeedYDampingChangeThreshold && !cam.LerpedFromPlayerFalling)
+            cam.LerpYDamping(true);
+        else if (vy >= 0f && cam.LerpedFromPlayerFalling)
+            cam.LerpYDamping(false);
     }
 
-    public bool IsFacingRight { get { return isFacingRight; } }
-    public float VerticalInput { get { return moveInput.y; } }
-    private bool IsCurrentlyInvulnerable { get { return isInvulnerable || isDashInvulnerable; } }
+    public bool IsFacingRight => isFacingRight;
+    public float VerticalInput => moveInput.y;
+    private bool IsCurrentlyInvulnerable => isInvulnerable || isDashInvulnerable;
 
     private void UpdateWallSlideState()
     {
@@ -495,7 +466,7 @@ public class PlayerController : MonoBehaviour
 
     private bool TryStartDashAttack()
     {
-        if (!WasActionPressedThisFrame(attackAction) || combatScript == null || !combatScript.CanStartDashAttack)
+        if (!attackAction.WasPressedThisFrame() || combatScript == null || !combatScript.CanStartDashAttack)
         {
             return false;
         }
@@ -513,7 +484,7 @@ public class PlayerController : MonoBehaviour
 
     private void TryQueueAttack()
     {
-        if (!WasActionPressedThisFrame(attackAction) || combatScript == null || !combatScript.CanQueueAttack)
+        if (!attackAction.WasPressedThisFrame() || combatScript == null || !combatScript.CanQueueAttack)
         {
             return;
         }
@@ -719,64 +690,47 @@ public class PlayerController : MonoBehaviour
         return action;
     }
 
-    private void EnableGameplayInput()
+    private void PlayClip(AudioClip clip)
     {
-        if (moveAction == null)
-        {
-            InitializeInputActions();
-        }
-
-        EnableInputAction(moveAction);
-        EnableInputAction(jumpAction);
-        EnableInputAction(dashAction);
-        EnableInputAction(attackAction);
-        EnableInputAction(interactAction);
-        EnableInputAction(healAction);
-        EnableInputAction(blockAction);
+        if (audioSource != null && clip != null) audioSource.PlayOneShot(clip);
     }
 
-    private void EnableInputAction(InputAction action)
+    private static void InitializeBar(UnityEngine.UI.Slider bar, float max)
     {
-        if (action == null || action.enabled)
-        {
-            return;
-        }
+        if (bar == null) return;
+        bar.minValue = 0f;
+        bar.maxValue = max;
+        bar.interactable = false;
+        if (bar.handleRect != null) bar.handleRect.gameObject.SetActive(false);
+    }
 
-        action.Enable();
-        enabledInputActions.Add(action);
+    private static void UpdateBar(UnityEngine.UI.Slider bar, float current, float max)
+    {
+        if (bar == null) return;
+        float clamped = Mathf.Clamp(current, 0f, max);
+        bar.value = clamped;
+        if (bar.fillRect != null) bar.fillRect.gameObject.SetActive(clamped > 0f);
+    }
+
+    private void EnableGameplayInput()
+    {
+        if (moveAction == null) InitializeInputActions();
+        foreach (InputAction action in ownedInputActions) action.Enable();
     }
 
     private void DisableGameplayInput()
     {
-        foreach (InputAction action in enabledInputActions)
-        {
-            action.Disable();
-        }
-
-        enabledInputActions.Clear();
+        foreach (InputAction action in ownedInputActions) action.Disable();
     }
 
     private void DisposeOwnedInputActions()
     {
-        DisableGameplayInput();
-
         foreach (InputAction action in ownedInputActions)
         {
+            action.Disable();
             action.Dispose();
         }
-
         ownedInputActions.Clear();
-    }
-
-    private void ReadMoveInput()
-    {
-        moveInput = moveAction != null ? moveAction.ReadValue<Vector2>() : Vector2.zero;
-        moveHorizontal = moveInput.x;
-    }
-
-    private bool WasActionPressedThisFrame(InputAction action)
-    {
-        return action != null && action.WasPressedThisFrame();
     }
 
     public bool TryUseHealingItem(int amount)
@@ -788,21 +742,16 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator UseHealingFlask(int amount)
     {
-        canMove = false;
-        rb2D.linearVelocity = new Vector2(0f, rb2D.linearVelocity.y);
+        SetMovementLocked(true);
 
-        if (audioSource != null && healClip != null)
-        {
-            audioSource.PlayOneShot(healClip);
-        }
-        
+        PlayClip(healClip);
 
         if (healObject != null) healObject.SetActive(true);
         yield return new WaitForSeconds(healTime);
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
         UpdateHealthBar();
         if (healObject != null) healObject.SetActive(false);
-        canMove = true;
+        SetMovementLocked(false);
     }
 
     public bool SpendSouls(int amount)
@@ -835,7 +784,7 @@ public class PlayerController : MonoBehaviour
                 isDashing = false;
                 rb2D.gravityScale = originalGravityScale;
             }
-            canMove = false;
+            SetMovementLocked(true);
             isInvulnerable = true;
 
             TakeDamage(15);
@@ -886,7 +835,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator StunRecovery()
     {
         yield return new WaitForSeconds(0.5f);
-        canMove = true;
+        SetMovementLocked(false);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -928,7 +877,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        canMove = false;
+        SetMovementLocked(true);
         isInvulnerable = true;
 
         BossWeaponDamage weaponDamage = collision.GetComponent<BossWeaponDamage>();
@@ -964,7 +913,7 @@ public class PlayerController : MonoBehaviour
             return false;
         }
 
-        if (audioSource != null && parryClip != null) audioSource.PlayOneShot(parryClip);
+        PlayClip(parryClip);
 
         float facingDirectionX = isFacingRight ? 1f : -1f;
         bool isBossAttack = collision.GetComponent<BossWeaponDamage>() != null;
@@ -988,10 +937,7 @@ public class PlayerController : MonoBehaviour
 
     private void TakeDamage(int damageAmount, bool isBoss = false)
     {
-        if (audioSource != null && hurtClip != null)
-        {
-            audioSource.PlayOneShot(hurtClip);
-        }
+        PlayClip(hurtClip);
 
         currentHealth = Mathf.Max(currentHealth - damageAmount, 0);
         UpdateHealthBar();
@@ -1010,19 +956,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void UpdateHealthBar()
-    {
-        if (healthBar != null)
-        {
-            float clampedHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-            healthBar.value = clampedHealth;
-
-            if (healthBar.fillRect != null)
-            {
-                healthBar.fillRect.gameObject.SetActive(clampedHealth > 0f);
-            }
-        }
-    }
+    private void UpdateHealthBar() => UpdateBar(healthBar, currentHealth, maxHealth);
 
     private void RespawnSouls()
     {
@@ -1041,24 +975,14 @@ public class PlayerController : MonoBehaviour
     {
         isDead = true;
 
-        if (currentSouls > 0)
+        if (GameManager.Instance != null)
         {
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.RegisterPlayerDeath(transform.position, currentSouls);
-            }
-            currentSouls = 0;
+            if (currentSouls > 0) GameManager.Instance.RegisterPlayerDeath(transform.position, currentSouls);
+            else GameManager.Instance.ClearDroppedSouls();
         }
-        else
-        {
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.ClearDroppedSouls();
-            }
-        }
+        currentSouls = 0;
 
         PersistPlayerState();
-
         StartCoroutine(GameOverRoutine(isBoss));
     }
 
@@ -1105,17 +1029,8 @@ public class PlayerController : MonoBehaviour
 
     public void SetCombatEnabled(bool enabled)
     {
-        if (attackAction != null)
-        {
-            if (enabled) attackAction.Enable();
-            else attackAction.Disable();
-        }
-
-        if (blockAction != null)
-        {
-            if (enabled) blockAction.Enable();
-            else blockAction.Disable();
-        }
+        if (enabled) { attackAction?.Enable(); blockAction?.Enable(); }
+        else { attackAction?.Disable(); blockAction?.Disable(); }
     }
 
     public void AddMaxHealthBonus(int amount)
@@ -1146,11 +1061,7 @@ public class PlayerController : MonoBehaviour
 
     public void AddSouls(int amount)
     {
-        if (audioSource != null && coinPickupClip != null)
-        {
-            audioSource.PlayOneShot(coinPickupClip);
-        }
-
+        PlayClip(coinPickupClip);
         currentSouls += amount;
 
         if (coinTweenRoutine != null) StopCoroutine(coinTweenRoutine);
@@ -1187,14 +1098,13 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator PerformInteraction()
     {
-        canMove = false;
-        rb2D.linearVelocity = new Vector2(0f, rb2D.linearVelocity.y);
+        SetMovementLocked(true);
 
         currentInteractableDoor.Interact();
 
         yield return new WaitForSeconds(1.5f);
 
-        canMove = true;
+        SetMovementLocked(false);
         currentInteractableDoor = null;
     }
 
@@ -1206,7 +1116,7 @@ public class PlayerController : MonoBehaviour
         hasUsedDashAttackThisDash = false;
         StartDashInvulnerability();
 
-        if (audioSource != null && dashClip != null) audioSource.PlayOneShot(dashClip);
+        PlayClip(dashClip);
 
         float originalGravity = rb2D.gravityScale;
         rb2D.gravityScale = 0f;
@@ -1271,16 +1181,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void LockMovementForAttack(bool isLocked)
-    {
-        canMove = !isLocked;
-        if (isLocked)
-        {
-            rb2D.linearVelocity = new Vector2(0f, rb2D.linearVelocity.y);
-        }
-
-    }
-
     public bool canConsumeStamina(float amount)
     {
         if (currentStamina > 0f)
@@ -1314,36 +1214,30 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void UpdateStaminaBar()
-    {
-        if (staminaBar != null)
-        {
-            float clampedStamina = Mathf.Clamp(currentStamina, 0f, maxStamina);
-            staminaBar.value = clampedStamina;
+    private void UpdateStaminaBar() => UpdateBar(staminaBar, currentStamina, maxStamina);
 
-            if (staminaBar.fillRect != null)
-            {
-                staminaBar.fillRect.gameObject.SetActive(clampedStamina > 0f);
-            }
-        }
-    }
+    public bool IsGrounded => isGrounded;
+    public float UpwardBounceForce => upwardBounceForce;
 
-    public bool IsGrounded { get { return isGrounded; } }
-    public float UpwardBounceForce { get { return upwardBounceForce; } }
+    private int movementLockCount = 0;
 
     public void SetMovementLocked(bool locked)
     {
-        canMove = !locked;
-        if (locked && rb2D != null)
+        if (locked)
         {
-            rb2D.linearVelocity = new Vector2(0f, rb2D.linearVelocity.y);
+            movementLockCount++;
+            if (rb2D != null)
+            {
+                rb2D.linearVelocity = new Vector2(0f, rb2D.linearVelocity.y);
+            }
         }
+        else if (movementLockCount > 0)
+        {
+            movementLockCount--;
+        }
+        canMove = movementLockCount == 0;
     }
 
-    public void PlayFootstep()
-    {
-        if (audioSource != null && walkClip != null)
-            audioSource.PlayOneShot(walkClip);
-    }
+    public void PlayFootstep() => PlayClip(walkClip);
 
 }
