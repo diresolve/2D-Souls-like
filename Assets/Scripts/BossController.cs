@@ -97,6 +97,7 @@ public class BossController : MonoBehaviour, IDamageable
     {
         boss = GetComponent<Rigidbody2D>();
         bodyCollider = GetComponent<Collider2D>();
+        InitializeBossWeaponDamage();
     }
 
     void Start()
@@ -131,7 +132,6 @@ public class BossController : MonoBehaviour, IDamageable
             UpdateHealthBar();
         }
 
-        InitializeBossWeaponDamage();
         InitializeScreenShake();
     }
 
@@ -296,9 +296,12 @@ public class BossController : MonoBehaviour, IDamageable
         if (bossWeaponDamage == null)
         {
             bossWeaponDamage = bossWeapon.AddComponent<BossWeaponDamage>();
+            bossWeaponDamage.SetDamage(normalAttackDamage);
         }
-
-        bossWeaponDamage.SetDamage(GetCurrentNormalAttackDamage());
+        else
+        {
+            normalAttackDamage = bossWeaponDamage.Damage;
+        }
     }
 
     public void EnableWeapon()
@@ -729,17 +732,5 @@ public class BossController : MonoBehaviour, IDamageable
         yield return new WaitForSeconds(0.5f);
 
         canMove = true;
-    }
-}
-
-public class BossWeaponDamage : MonoBehaviour
-{
-    [SerializeField] private int damage = 25;
-
-    public int Damage { get { return damage; } }
-
-    public void SetDamage(int value)
-    {
-        damage = Mathf.Max(value, 0);
     }
 }
